@@ -157,10 +157,7 @@ export function leaderboard(userId: string, userName: string): LeaderboardEntry[
   const mocks = getMocks(userId);
   const myAccuracy = accuracy(userId);
   const myBest = mocks.length ? Math.max(...mocks.map((m) => Math.round((m.score / m.total) * 100))) : 0;
-  const rows: [string, number, number, number][] = [
-    ...PEERS,
-    [userName || "You", myBest, myAccuracy, mocks.length],
-  ]
+  const rows: LeaderboardEntry[] = [...PEERS, [userName, myBest, myAccuracy, mocks.length] as [string, number, number, number]]
     .sort((a, b) => b[1] - a[1])
     .map(([name, score, acc, m], i) => ({
       rank: i + 1,

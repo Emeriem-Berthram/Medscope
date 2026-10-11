@@ -2,24 +2,25 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { QUESTIONS } from "@/lib/questions";
+import { QUESTIONS, Question } from "@/lib/questions";
 import { recordAttempt, recordMock } from "@/lib/store";
 
 const MOCK_LENGTH = 10;
 const MOCK_SECONDS = 300;
 
 type Phase = "intro" | "exam" | "done";
+type MockQuestion = Question & { id: number };
 
 export default function MockExam() {
   const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>("intro");
-  const [questions, setQuestions] = useState<(typeof QUESTIONS & { id: number })[]>([]);
+  const [questions, setQuestions] = useState<MockQuestion[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const answersRef = useRef<Record<number, string>>({});
   const [current, setCurrent] = useState(0);
   const [secondsLeft, setSecondsLeft] = useState(MOCK_SECONDS);
 
-  const pool = useMemo(() => {
+  const pool = useMemo<MockQuestion[]>(() => {
     const base = QUESTIONS.map((q, i) => ({ ...q, id: i }));
     const filtered = user?.faculty
       ? base.filter((q) => q.faculty === user.faculty)
