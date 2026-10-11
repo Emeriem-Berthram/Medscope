@@ -103,7 +103,7 @@ export default function Home() {
             Recall-based — built from real past exam papers
           </p>
           <h1 className="text-4xl font-bold leading-tight md:text-5xl">
-            Pass your postgraduate medical exams with confidence
+            Comprehensive preparation for postgraduate medical examination success
           </h1>
           <p className="mt-4 text-lg text-teal-800/80">
             The question bank built specifically for NPMCN, WACP, WACS and Primaries —
