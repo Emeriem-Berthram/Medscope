@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+.env
+.env.local
+*.log
+dev.log
+dev.err
+npmout*.log
+npmout*.err
+.DS_Store
