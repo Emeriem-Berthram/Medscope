@@ -69,6 +69,21 @@ export default function MockExam() {
 
   if (!user) return null;
 
+  if (pool.length === 0) {
+    return (
+      <div className="mx-auto max-w-xl">
+        <h1 className="text-2xl font-bold text-teal-950">Timed mock exam</h1>
+        <div className="mt-6 rounded-2xl border border-teal-100 bg-white p-10 text-center">
+          <p className="font-bold text-teal-950">No questions yet</p>
+          <p className="mt-2 text-sm text-teal-800/70">
+            Mock exams unlock as soon as questions are uploaded to the
+            bank.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (phase === "intro") {
     return (
       <div className="mx-auto max-w-xl">
