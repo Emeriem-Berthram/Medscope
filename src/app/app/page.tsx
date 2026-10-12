@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { accuracy, getAttempts, getMocks, weakAreas } from "@/lib/store";
 import { DEPARTMENTS, EXAMS } from "@/lib/questions";
-import { listBattleRooms } from "@/lib/rooms";
+import { listBattleRooms, fetchPublicBattles, Room } from "@/lib/rooms";
 
 export default function Dashboard() {
   const { user, setProfile } = useAuth();
@@ -110,7 +110,37 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
+        <h2 className="font-bold text-burgundy-950">
+          Invite a colleague
+        </h2>
+        <p className="mt-2 text-sm text-burgundy-800/70">
+          Share your personal invite link — when a doctor signs up
+          with it, you both get 5 extra free questions.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <code className="rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2 text-sm font-bold tracking-wider text-burgundy-700">
+            {user.inviteCode}
+          </code>
+          <button
+            onClick={() => {
+              navigator.clipboard
+                ?.writeText(
+                  `https://medscope-app.vercel.app/signup?ref=${user.inviteCode}`
+                )
+                .catch(() => {});
+            }}
+            className="rounded-full bg-burgundy-600 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-burgundy-700"
+          >
+            Copy invite link
+          </button>
+        </div>
+        <p className="mt-3 break-all text-xs text-burgundy-800/60">
+          https://medscope-app.vercel.app/signup?ref={user.inviteCode}
+        </p>
+      </section>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-2">
             <section className="rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
               <h2 className="font-bold text-burgundy-950">Your weakest areas</h2>
               {weak.length === 0 ? (
@@ -248,7 +278,11 @@ export default function Dashboard() {
 }
 
 function BattleList() {
-  const battles = listBattleRooms();
+  const [battles, setBattles] = useState<Room[]>([]);
+  useEffect(() => {
+    setBattles(listBattleRooms());
+    void fetchPublicBattles().then(setBattles);
+  }, []);
   if (battles.length === 0) {
     return (
       <p className="mt-3 text-sm text-burgundy-800/70">

@@ -7,10 +7,15 @@ export const metadata = {
     "Create a free Medscope account. 20 questions a month and Free Resources, no card needed.",
 };
 
-export default function SignupPage() {
+export default function SignupPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-14">
-      <div className="rounded-2xl border border-burgundy-100 p-8">
+      <InviteBanner searchParams={searchParams} />
+      <div className="rounded-2xl border border-burgundy-100 bg-cream-50 p-8">
         <h1 className="text-3xl font-bold text-burgundy-950">
           Create your free account
         </h1>
@@ -27,5 +32,19 @@ export default function SignupPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+async function InviteBanner({
+  searchParams,
+}: {
+  searchParams: Promise<{ ref?: string }>;
+}) {
+  const ref = (await searchParams).ref;
+  if (!ref) return null;
+  return (
+    <p className="mb-4 rounded-xl border border-burgundy-200 bg-burgundy-50 px-4 py-3 text-center text-sm font-semibold text-burgundy-800">
+      You were invited with code {ref}
+    </p>
   );
 }

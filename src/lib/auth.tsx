@@ -16,12 +16,14 @@ export interface User {
   faculty: string;
   plan: "free" | "monthly" | "six_month" | "annual";
   questionsUsed: number;
+  inviteCode: string;
+  referredBy: string;
 }
 
 interface AuthContextValue {
   user: User | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (name: string, email: string, password: string) => Promise<void>;
+  signUp: (name: string, email: string, password: string, referredBy?: string) => Promise<void>;
   signOut: () => void;
   setProfile: (patch: Partial<User>) => void;
 }
@@ -29,6 +31,15 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 const STORAGE_KEY = "medscope_user";
+
+function generateInviteCode(): string {
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let code = "";
+  for (let i = 0; i < 8; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return `MD-${code}`;
+}
 
 function loadUser(): User | null {
   try {
@@ -61,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     throw new Error("No account found for that email. Create a free account first.");
   };
 
-  const signUp = async (name: string, email: string, _password: string) => {
+  const signUp = async (name: string, email: string, _password: string, referredBy: string = "") => {
     const newUser: User = {
       id: crypto.randomUUID(),
       email,
@@ -70,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       faculty: "",
       plan: "free",
       questionsUsed: 0,
+      inviteCode: generateInviteCode(),
+      referredBy,
     };
     saveUser(newUser);
     setUser(newUser);

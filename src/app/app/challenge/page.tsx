@@ -6,10 +6,12 @@ import { DEPARTMENTS, EXAMS, QUESTIONS, Question } from "@/lib/questions";
 import {
   answerInRoom,
   createRoom,
+  fetchRoom,
   generateCode,
   getRoom,
   joinRoom,
   saveRoom,
+  subscribeRoom,
 } from "@/lib/rooms";
 
 type Phase = "create" | "waiting" | "game" | "results";
@@ -58,6 +60,14 @@ export default function ChallengeRoom() {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, timeLeft, revealed]);
+
+  // sync remote room state over Supabase Realtime
+  useEffect(() => {
+    if (!code || phase === "results" || phase === "create") return;
+    const unsub = subscribeRoom(code, (r) => setRoom(r));
+    return unsub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, phase]);
 
   function buildPool(r: NonNullable<ReturnType<typeof getRoom>>) {
     const base = QUESTIONS.map((q, i) => ({ ...q, id: i }));
@@ -118,11 +128,12 @@ export default function ChallengeRoom() {
     setPhase("waiting");
   }
 
-  function joinChallenge(e: FormEvent) {
+  async function joinChallenge(e: FormEvent) {
     e.preventDefault();
     setError("");
     if (!joinCode.trim()) return setError("Enter the room code.");
     if (!joinName.trim()) return setError("Enter your name.");
+    await fetchRoom(joinCode);
     const joined = joinRoom(joinCode, joinName.trim());
     if (!joined) return setError("Room is full or the code is wrong.");
     setRoom(joined);

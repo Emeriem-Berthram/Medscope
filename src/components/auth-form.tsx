@@ -20,7 +20,8 @@ export default function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         if (name.trim().length < 2) throw new Error("Enter your full name.");
         if (password.length < 6)
           throw new Error("Password must be at least 6 characters.");
-        await signUp(name.trim(), email.trim(), password);
+        const params = new URLSearchParams(window.location.search);
+        await signUp(name.trim(), email.trim(), password, params.get("ref") ?? "");
       } else {
         await signIn(email.trim(), password);
       }

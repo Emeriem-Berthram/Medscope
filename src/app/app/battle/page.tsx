@@ -5,11 +5,14 @@ import { useAuth } from "@/lib/auth";
 import { DEPARTMENTS, EXAMS, QUESTIONS, Question } from "@/lib/questions";
 import {
   createRoom,
+  fetchRoom,
+  fetchPublicBattles,
   generateCode,
   getRoom,
   joinRoom,
   listBattleRooms,
   saveRoom,
+  subscribeRoom,
   Room,
 } from "@/lib/rooms";
 
@@ -61,6 +64,7 @@ export default function BattleRoom() {
 
   function refreshBattles() {
     setBattles(listBattleRooms());
+    void fetchPublicBattles().then(setBattles);
   }
 
   useEffect(refreshBattles, [phase]);
@@ -98,6 +102,14 @@ export default function BattleRoom() {
     return () => timers.forEach(clearTimeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, qIndex, revealed]);
+
+  // sync remote room state over Supabase Realtime
+  useEffect(() => {
+    if (!room || phase === "results" || phase === "lobby" || phase === "create") return;
+    const unsub = subscribeRoom(room.code, (r) => setRoom(r));
+    return unsub;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room?.code, phase]);
 
   function buildPool(r: Room) {
     const base = QUESTIONS.map((q, i) => ({ ...q, id: i }));
@@ -194,9 +206,13 @@ export default function BattleRoom() {
     setPhase("waiting");
   }
 
-  function joinBattle(code: string) {
-    const joined = getRoom(code);
-    if (!joined) return setError("Battle not found.");
+  async function joinBattle(code: string) {
+    const local = getRoom(code);
+    const joined = local ?? (await fetchRoom(code));
+    if (!joined) {
+      setError("Battle not found.");
+      return;
+    }
     setRoom(joined);
     setPhase("waiting");
   }
