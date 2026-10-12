@@ -6,6 +6,8 @@ import { useAuth } from "@/lib/auth";
 import { accuracy, getAttempts, getMocks, weakAreas } from "@/lib/store";
 import { DEPARTMENTS, EXAMS } from "@/lib/questions";
 import { listBattleRooms, fetchPublicBattles, Room } from "@/lib/rooms";
+import SubscribeModal from "@/components/subscribe-modal";
+import { PLANS } from "@/lib/paystack";
 
 export default function Dashboard() {
   const { user, setProfile } = useAuth();
@@ -110,7 +112,41 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <section className="rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-burgundy-800/70">
+                Your plan
+              </p>
+              <p className="mt-1 text-2xl font-bold text-burgundy-950 capitalize">
+                {user.plan === "free" ? "Free" : user.plan === "annual" ? "Annual" : "Monthly"}
+              </p>
+            </div>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                user.plan === "free"
+                  ? "border border-burgundy-200 text-burgundy-700"
+                  : "bg-burgundy-600 text-cream-50"
+              }`}
+            >
+              {user.plan === "free" ? "20 questions/month" : "Full bank unlocked"}
+            </span>
+          </div>
+          {user.plan === "free" ? (
+            <SubscriptionButton />
+          ) : (
+            <p className="mt-4 text-sm text-burgundy-800/70">
+              Thanks for subscribing — your full question bank is
+              unlocked.
+            </p>
+          )}
+        </section>
+
+        <SubscriptionCard />
+      </div>
+
+      <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
         <h2 className="font-bold text-burgundy-950">
           Invite a colleague
         </h2>
@@ -274,6 +310,59 @@ export default function Dashboard() {
         </>
       )}
     </div>
+  );
+}
+
+function SubscriptionButton() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="mt-4 rounded-full bg-burgundy-600 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-burgundy-700"
+      >
+        Subscribe now
+      </button>
+      <SubscribeModal open={open} onClose={() => setOpen(false)} />
+    </>
+  );
+}
+
+function SubscriptionCard() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <section className="rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
+        <h2 className="font-bold text-burgundy-950">
+          Subscribe for the full bank
+        </h2>
+        <p className="mt-1 text-sm text-burgundy-800/70">
+          Every question, every mock, offline packs.
+        </p>
+        <div className="mt-4 space-y-3">
+          {PLANS.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => setOpen(true)}
+              className="flex w-full items-center justify-between rounded-xl border border-burgundy-100 bg-cream-50 px-4 py-3 text-left hover:border-burgundy-400"
+            >
+              <div>
+                <p className="font-semibold text-burgundy-950">
+                  {plan.name}
+                </p>
+                <p className="text-xs text-burgundy-800/60">
+                  {plan.blurb}
+                </p>
+              </div>
+              <p className="ml-3 font-bold text-burgundy-600">
+                {plan.price}
+              </p>
+            </button>
+          ))}
+        </div>
+      </section>
+      <SubscribeModal open={open} onClose={() => setOpen(false)} />
+    </>
   );
 }
 
