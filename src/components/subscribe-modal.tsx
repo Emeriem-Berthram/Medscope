@@ -108,7 +108,7 @@ export default function SubscribeModal({
             ))}
             {status === "paying" && (
               <p className="text-center text-sm text-burgundy-800/70">
-                Complete the payment in the Paystack popup…
+                Complete the payment in the Paystack checkout…
               </p>
             )}
             {status === "error" && (

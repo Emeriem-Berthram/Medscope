@@ -65,7 +65,7 @@ src/components/auth-form.tsx  shared signup/signin form
 
 - Palette: turquoise (`teal-500` #14b8a6 family) and white — per client
 - Prices: Monthly ₦12,000/mo, Annual ₦10,000/yr (annual framed as
-  "save ₦134,000"), Free = 20 questions/month
+  "save ₦134,000"), Free = 10 questions/month
 - Client components start with `"use client"`; server components by default
 - Path alias `@/*` → `./src/*`
 - Copy tone: plain verbs, sentence case, active voice

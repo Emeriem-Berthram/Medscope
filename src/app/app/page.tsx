@@ -106,7 +106,7 @@ export default function Dashboard() {
             </div>
             <div className="rounded-2xl border border-burgundy-100 bg-cream-50 p-5">
               <p className="text-3xl font-bold text-burgundy-600">
-                {user.plan === "free" ? Math.max(20 - attempts.length, 0) : "∞"}
+                {user.plan === "free" ? Math.max(10 - attempts.length, 0) : "∞"}
               </p>
               <p className="mt-1 text-xs">Free questions left</p>
             </div>
@@ -130,7 +130,7 @@ export default function Dashboard() {
                   : "bg-burgundy-600 text-cream-50"
               }`}
             >
-              {user.plan === "free" ? "20 questions/month" : "Full bank unlocked"}
+              {user.plan === "free" ? "10 questions/month" : "Full bank unlocked"}
             </span>
           </div>
           {user.plan === "free" ? (

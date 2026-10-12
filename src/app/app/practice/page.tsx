@@ -138,7 +138,7 @@ export default function Practice() {
 
       {user.plan === "free" && answered > 0 && answered % 20 === 0 && (
         <p className="mt-4 rounded-xl border border-burgundy-100 bg-cream-50 p-4 text-sm text-burgundy-800/80">
-          You&apos;ve used your 20 free questions this month.{" "}
+          You&apos;ve used your 10 free questions this month.{" "}
           <button onClick={() => router.push("/app/mock")} className="font-semibold text-burgundy-600 hover:underline">
             Subscribe to keep practising
           </button>

@@ -1,6 +1,11 @@
 /* Paystack checkout (test mode).
-   Loads the Paystack popup script on demand — no package
-   needed. Amounts are in kobo (₦12,000 = 1,200,000). */
+   Uses the official @paystack/inline-js package so the
+   checkout ships with our build — no external script,
+   no deprecated CDN, and no popup-blocker issues.
+   Amounts are in kobo (₦12,000 = 1,200,000).
+   The package touches window at import time, so it is
+   loaded lazily inside the pay function (never on the
+   server during prerendering). */
 
 export const PAYSTACK_PUBLIC_KEY =
   process.env.NEXT_PUBLIC_PAYSTACK_KEY ??
@@ -12,37 +17,18 @@ export const PLANS = [
     name: "Monthly",
     price: "₦12,000/mo",
     amountKobo: 1200000,
-    blurb: "Full bank for your college & faculty, timed mocks, analytics, offline packs.",
+    blurb:
+      "Full bank for your college & faculty, timed mocks, analytics, offline packs.",
   },
   {
     id: "annual" as const,
     name: "Annual",
     price: "₦10,000/yr",
     amountKobo: 1000000,
-    blurb: "Everything in Monthly — save ₦134,000 a year, priority support and exam-season updates.",
+    blurb:
+      "Everything in Monthly — save ₦134,000 a year, priority support and exam-season updates.",
   },
 ];
-
-function loadPaystackScript(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") return reject(new Error("no window"));
-    const existing = document.querySelector<HTMLScriptElement>(
-      'script[src*="js.paystack.co"]'
-    );
-    if (existing) {
-      if ((window as any).PaystackPop) return resolve();
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", reject);
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = "https://js.paystack.co/v1/1.0.3/paystack.js";
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Paystack failed to load"));
-    document.body.appendChild(script);
-  });
-}
 
 interface PayOptions {
   email: string;
@@ -55,24 +41,25 @@ interface PayOptions {
 export async function payWithPaystack({
   email,
   amountKobo,
-  plan,
   onSuccess,
   onCancel,
 }: PayOptions) {
-  await loadPaystackScript();
-  const handler = (window as any).PaystackPop.setup({
+  const { default: PaystackPop } = await import("@paystack/inline-js");
+  const paystack = new PaystackPop();
+  paystack.newTransaction({
     key: PAYSTACK_PUBLIC_KEY,
     email,
     amount: amountKobo,
     currency: "NGN",
-    ref: `medscope_${Date.now()}_${Math.random()
+    // Paystack only allows -, ., = and alphanumeric
+    // characters in a reference.
+    reference: `medscope-${Date.now()}-${Math.random()
       .toString(36)
       .slice(2, 8)}`,
-    callback: (response: { reference: string }) =>
-      onSuccess(response.reference),
-    onClose: onCancel,
+    onSuccess: (transaction) => onSuccess(transaction.reference ?? ""),
+    onCancel,
+    onError: () => onCancel(),
   });
-  handler.openIframe();
 }
 
 export function planIdFromReference(plan: "monthly" | "annual") {

@@ -81,7 +81,7 @@ export default function Coverage() {
       <div className="mt-12 rounded-2xl bg-burgundy-50 p-8 text-center">
         <h2 className="text-2xl font-bold text-burgundy-950">Found your faculty?</h2>
         <p className="mx-auto mt-2 max-w-xl text-burgundy-800/80">
-          Every account gets 20 free questions every month. Open your faculty, read real stems and
+          Every account gets 10 free questions every month. Open your faculty, read real stems and
           explanations, and get a feel for the platform before you pay for anything.
         </p>
         <a

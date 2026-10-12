@@ -64,7 +64,7 @@ const faqs = [
   },
   {
     q: "How much does it cost?",
-    a: "A free account includes 20 questions a month and the Free Resources library, no card needed. Paid plans unlock the full bank for your college and faculty.",
+    a: "A free account includes 10 questions a month and the Free Resources library, no card needed. Paid plans unlock the full bank for your college and faculty.",
   },
   {
     q: "Do you add new questions?",
@@ -122,7 +122,7 @@ export default function Home() {
             </a>
           </div>
           <p className="mt-4 text-sm text-burgundy-700/70">
-            Free account includes 20 questions a month and Free Resources — no card
+            Free account includes 10 questions a month and Free Resources — no card
             needed. Subscribe when you want the full bank.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-2">
@@ -460,7 +460,7 @@ export default function Home() {
             {
               name: "Free",
               price: "₦0",
-              desc: "20 questions a month, Free Resources library, no card needed.",
+              desc: "10 questions a month, Free Resources library, no card needed.",
               plan: "free" as const,
               cta: "Create free account",
             },

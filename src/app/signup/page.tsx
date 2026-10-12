@@ -4,7 +4,7 @@ import AuthForm from "@/components/auth-form";
 export const metadata = {
   title: "Sign up free — Medscope",
   description:
-    "Create a free Medscope account. 20 questions a month and Free Resources, no card needed.",
+    "Create a free Medscope account. 10 questions a month and Free Resources, no card needed.",
 };
 
 export default function SignupPage({
@@ -20,7 +20,7 @@ export default function SignupPage({
           Create your free account
         </h1>
         <p className="mt-2 text-sm text-burgundy-800/70">
-          20 free questions a month and the Free Resources library. No card
+          10 free questions a month and the Free Resources library. No card
           needed.
         </p>
         <AuthForm mode="signup" />
