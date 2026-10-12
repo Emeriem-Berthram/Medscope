@@ -220,40 +220,76 @@ export default function Home() {
           {/* Face-off illustration */}
           <div className="rounded-3xl border border-burgundy-100 bg-gradient-to-b from-burgundy-50 to-cream-50 p-10">
             <svg
-              viewBox="0 0 320 240"
+              viewBox="0 0 360 300"
               className="mx-auto w-full"
               role="img"
               aria-label="Two doctors facing off"
             >
-              {/* ground line */}
-              <line x1="20" y1="205" x2="300" y2="205" stroke="#e5c6cd" strokeWidth="3" strokeLinecap="round" />
-              {/* left figure */}
+              <defs>
+                <radialGradient id="burst" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#800020" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#800020" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+              <circle cx="180" cy="150" r="130" fill="url(#burst)" />
+              <line x1="30" y1="270" x2="330" y2="270" stroke="#e3d4b8" strokeWidth="4" strokeLinecap="round" />
+
+              {/* LEFT FIGURE — burgundy scrubs, combat stance */}
               <g>
-                <circle cx="105" cy="70" r="26" fill="#800020" />
-                <path d="M70 205 L78 130 Q105 112 132 130 L140 205 Z" fill="#800020" />
-                <circle cx="97" cy="66" r="3" fill="#fdfbf7" />
-                <circle cx="113" cy="66" r="3" fill="#fdfbf7" />
-                <path d="M96 80 Q105 86 114 80" stroke="#fdfbf7" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <line x1="78" y1="140" x2="52" y2="165" stroke="#800020" strokeWidth="9" strokeLinecap="round" />
-                <line x1="132" y1="140" x2="150" y2="118" stroke="#800020" strokeWidth="9" strokeLinecap="round" />
+                {/* back leg */}
+                <path d="M118 270 L112 205 L100 270 Z" fill="#450011" />
+                {/* front leg */}
+                <path d="M132 270 L138 205 L152 270 Z" fill="#570016" />
+                {/* torso — scrubs */}
+                <path d="M108 205 L116 128 Q138 116 160 128 L168 205 Z" fill="#800020" />
+                {/* head */}
+                <circle cx="138" cy="100" r="24" fill="#c68863" />
+                {/* hair */}
+                <path d="M114 96 Q116 72 138 72 Q160 72 162 96 Q150 84 138 84 Q126 84 114 96 Z" fill="#2e000b" />
+                {/* face */}
+                <circle cx="131" cy="99" r="2.4" fill="#2e000b" />
+                <circle cx="145" cy="99" r="2.4" fill="#2e000b" />
+                <path d="M132 108 Q138 112 144 108" stroke="#2e000b" strokeWidth="2" fill="none" strokeLinecap="round" />
+                {/* stethoscope */}
+                <path d="M126 130 Q138 148 150 130" stroke="#2e000b" strokeWidth="2.5" fill="none" />
+                <circle cx="138" cy="152" r="4" fill="#2e000b" />
+                {/* guard arms */}
+                <path d="M116 136 L92 118" stroke="#800020" strokeWidth="11" strokeLinecap="round" />
+                <circle cx="88" cy="115" r="7" fill="#c68863" />
+                <path d="M160 136 L172 112" stroke="#800020" strokeWidth="11" strokeLinecap="round" />
+                <circle cx="174" cy="108" r="7" fill="#c68863" />
               </g>
-              {/* right figure */}
+
+              {/* RIGHT FIGURE — lighter scrubs, combat stance */}
               <g>
-                <circle cx="215" cy="70" r="26" fill="#bc6b7c" />
-                <path d="M180 205 L188 130 Q215 112 242 130 L250 205 Z" fill="#bc6b7c" />
-                <circle cx="207" cy="66" r="3" fill="#fdfbf7" />
-                <circle cx="223" cy="66" r="3" fill="#fdfbf7" />
-                <path d="M206 80 Q215 86 224 80" stroke="#fdfbf7" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-                <line x1="188" y1="140" x2="170" y2="118" stroke="#bc6b7c" strokeWidth="9" strokeLinecap="round" />
-                <line x1="242" y1="140" x2="268" y2="165" stroke="#bc6b7c" strokeWidth="9" strokeLinecap="round" />
+                <path d="M242 270 L248 205 L260 270 Z" fill="#d19da8" />
+                <path d="M228 270 L222 205 L208 270 Z" fill="#bc6b7c" />
+                <path d="M252 205 L244 128 Q222 116 200 128 L192 205 Z" fill="#bc6b7c" />
+                <circle cx="222" cy="100" r="24" fill="#8d5a3b" />
+                <path d="M198 94 Q200 68 222 68 Q244 68 246 94 Q236 80 222 82 Q208 80 198 94 Z" fill="#2e000b" />
+                <circle cx="215" cy="99" r="2.4" fill="#2e000b" />
+                <circle cx="229" cy="99" r="2.4" fill="#2e000b" />
+                <path d="M216 108 Q222 112 228 108" stroke="#2e000b" strokeWidth="2" fill="none" strokeLinecap="round" />
+                <path d="M234 130 Q222 148 210 130" stroke="#2e000b" strokeWidth="2.5" fill="none" />
+                <circle cx="222" cy="152" r="4" fill="#2e000b" />
+                <path d="M244 136 L268 118" stroke="#bc6b7c" strokeWidth="11" strokeLinecap="round" />
+                <circle cx="272" cy="115" r="7" fill="#8d5a3b" />
+                <path d="M200 136 L188 112" stroke="#bc6b7c" strokeWidth="11" strokeLinecap="round" />
+                <circle cx="186" cy="108" r="7" fill="#8d5a3b" />
               </g>
-              {/* VS badge */}
-              <circle cx="160" cy="100" r="30" fill="#fdfbf7" stroke="#800020" strokeWidth="3" />
-              <text x="160" y="110" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="24" fill="#800020">VS</text>
-              {/* spark lines */}
-              <line x1="148" y1="60" x2="140" y2="44" stroke="#d19da8" strokeWidth="3" strokeLinecap="round" />
-              <line x1="172" y1="60" x2="180" y2="44" stroke="#d19da8" strokeWidth="3" strokeLinecap="round" />
-              <line x1="160" y1="52" x2="160" y2="34" stroke="#d19da8" strokeWidth="3" strokeLinecap="round" />
+
+              {/* VS burst */}
+              <circle cx="180" cy="105" r="34" fill="#fdfbf7" stroke="#800020" strokeWidth="4" />
+              <text x="180" y="117" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="28" fill="#800020">VS</text>
+
+              {/* energy sparks */}
+              <g stroke="#a34457" strokeWidth="4" strokeLinecap="round">
+                <line x1="168" y1="52" x2="158" y2="30" />
+                <line x1="192" y1="52" x2="202" y2="30" />
+                <line x1="180" y1="48" x2="180" y2="24" />
+                <line x1="150" y1="66" x2="132" y2="52" />
+                <line x1="210" y1="66" x2="228" y2="52" />
+              </g>
             </svg>
             <p className="mt-4 text-center text-sm font-semibold text-burgundy-700">
               Challenge room — two doctors, one question bank
@@ -335,6 +371,77 @@ export default function Home() {
                 <p className="mt-2 text-sm text-burgundy-100">{s.body}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Battle room visual */}
+      <section className="bg-burgundy-600 py-16 text-cream-50">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 md:grid-cols-2">
+          <div>
+            <h2 className="text-3xl font-bold">
+              Battle room — up to 20 doctors, one clock
+            </h2>
+            <p className="mt-3 text-burgundy-100">
+              The fastest correct answer takes 2 points. A wrong
+              answer costs 0.5. Every player sees the same
+              question, and everyone leaves with the questions,
+              answers, and explanations.
+            </p>
+            <ul className="mt-6 space-y-2 text-sm text-burgundy-100">
+              <li>· Choose a title and topic — "Cardiology battle"</li>
+              <li>· Start immediately or schedule for later</li>
+              <li>· Public or private rooms</li>
+              <li>· Set the number of questions and time per question</li>
+            </ul>
+            <a
+              href="/signup"
+              className="mt-8 inline-block rounded-full bg-cream-50 px-8 py-3 font-semibold text-burgundy-700 hover:bg-white"
+            >
+              Start a battle
+            </a>
+          </div>
+
+          {/* Battle room illustration */}
+          <div className="rounded-3xl bg-cream-50 p-8 text-burgundy-950">
+            <svg
+              viewBox="0 0 360 260"
+              className="mx-auto w-full"
+              role="img"
+              aria-label="Battle room scoreboard"
+            >
+              {/* scoreboard */}
+              <rect x="110" y="10" width="140" height="46" rx="8" fill="#800020" />
+              <text x="180" y="40" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="20" fill="#fdfbf7">LIVE</text>
+              {/* three figures */}
+              {[90, 180, 270].map((cx, i) => (
+                <g key={cx}>
+                  <circle cx={cx} cy="120" r="22" fill={i === 0 ? "#800020" : i === 1 ? "#bc6b7c" : "#d19da8"} />
+                  <path d={`M${cx - 30} 235 L${cx - 24} 165 Q${cx} 150 ${cx + 24} 165 L${cx + 30} 235 Z`} fill={i === 0 ? "#800020" : i === 1 ? "#bc6b7c" : "#d19da8"} />
+                  {/* arm raised */}
+                  <line x1={cx - 24} y1="175" x2={cx - 44} y2="140" stroke={i === 0 ? "#800020" : i === 1 ? "#bc6b7c" : "#d19da8"} strokeWidth="8" strokeLinecap="round" />
+                </g>
+              ))}
+              {/* timer badge */}
+              <circle cx="320" cy="60" r="24" fill="#fdfbf7" stroke="#800020" strokeWidth="3" />
+              <text x="320" y="67" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="16" fill="#800020">40s</text>
+            </svg>
+            <div className="mt-2 space-y-1">
+              {[
+                ["#1", "Dr. Chidi O.", "6.0"],
+                ["#2", "Dr. Fatima B.", "4.0"],
+                ["#3", "Dr. Emeka N.", "2.0"],
+              ].map((r) => (
+                <div
+                  key={r[0]}
+                  className="flex items-center justify-between rounded-lg border border-burgundy-100 bg-cream-50 px-3 py-1.5 text-sm"
+                >
+                  <span className="text-burgundy-600">{r[0]}</span>
+                  <span className="font-medium text-burgundy-950">{r[1]}</span>
+                  <span className="font-bold text-burgundy-600">{r[2]}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
