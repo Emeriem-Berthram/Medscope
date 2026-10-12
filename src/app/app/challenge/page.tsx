@@ -288,7 +288,12 @@ export default function ChallengeRoom() {
   if (phase === "waiting" && currentRoom) {
     return (
       <div className="mx-auto max-w-xl">
-        <h1 className="text-2xl font-bold text-burgundy-950">{currentRoom.title}</h1>
+        <h1 className="text-2xl font-bold text-burgundy-950">
+          Challenge room
+        </h1>
+        <p className="mt-1 text-lg font-semibold text-burgundy-800">
+          {currentRoom.title}
+        </p>
         <p className="mt-1 text-sm text-burgundy-800/70">
           {currentRoom.faculty} · {currentRoom.topic} ·{" "}
           {currentRoom.questionCount} questions · {currentRoom.secondsPerQuestion}s each
@@ -302,9 +307,29 @@ export default function ChallengeRoom() {
             Send this code to your opponent. The questions appear once
             they join.
           </p>
-          <p className="mt-6 font-semibold text-burgundy-900">
-            {currentRoom.players.map((p) => p.name).join(" vs ")}
-          </p>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            {currentRoom.players.map((p, i) => (
+              <div
+                key={p.name}
+                className="rounded-xl border border-burgundy-100 bg-cream-50 p-4"
+              >
+                <p className="text-xs font-semibold uppercase tracking-wider text-burgundy-600">
+                  Player {i + 1}
+                </p>
+                <p className="mt-1 font-bold text-burgundy-950">{p.name}</p>
+              </div>
+            ))}
+            {currentRoom.players.length === 1 && (
+              <div className="rounded-xl border border-dashed border-burgundy-200 p-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-burgundy-600">
+                  Player 2
+                </p>
+                <p className="mt-1 text-sm text-burgundy-800/60">
+                  Waiting for opponent…
+                </p>
+              </div>
+            )}
+          </div>
           {currentRoom.players.length === 1 && (
             <button
               onClick={() => {
@@ -360,6 +385,9 @@ export default function ChallengeRoom() {
                   : "border-burgundy-100 bg-cream-50"
               }`}
             >
+              <p className="text-xs font-semibold uppercase tracking-wider text-burgundy-600">
+                Player {i + 1}
+              </p>
               <p className="text-sm font-semibold text-burgundy-950">
                 {p.name}
                 {qIndex % 2 === i && " — your turn"}
