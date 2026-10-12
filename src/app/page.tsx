@@ -1,3 +1,5 @@
+import PricingButton from "@/components/pricing-button";
+
 const features = [
   {
     title: "Real exam recalls",
@@ -455,20 +457,33 @@ export default function Home() {
         </p>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {[
-            ["Free", "₦0", "20 questions a month, Free Resources library, no card needed."],
-            ["Monthly", "₦12,000/mo", "Full bank for your college & faculty, timed mocks, analytics, offline packs."],
-            ["Annual", "₦10,000/yr", "Everything in Monthly — save ₦134,000 a year, priority support and exam-season updates."],
-          ].map(([name, price, desc]) => (
-            <div key={name} className="flex flex-col rounded-2xl border border-burgundy-100 p-6">
-              <h3 className="font-bold text-burgundy-700">{name}</h3>
-              <p className="mt-2 text-3xl font-bold">{price}</p>
-              <p className="mt-3 flex-1 text-sm text-burgundy-900/70">{desc}</p>
-              <a
-                href={name === "Free" ? "/signup" : "/login"}
-                className="mt-6 rounded-full bg-burgundy-500 px-4 py-2.5 text-center font-semibold text-white hover:bg-burgundy-600"
-              >
-                {name === "Free" ? "Create free account" : "Subscribe"}
-              </a>
+            {
+              name: "Free",
+              price: "₦0",
+              desc: "20 questions a month, Free Resources library, no card needed.",
+              plan: "free" as const,
+              cta: "Create free account",
+            },
+            {
+              name: "Monthly",
+              price: "₦12,000/mo",
+              desc: "Full bank for your college & faculty, timed mocks, analytics, offline packs.",
+              plan: "monthly" as const,
+              cta: "Subscribe",
+            },
+            {
+              name: "Annual",
+              price: "₦10,000/yr",
+              desc: "Everything in Monthly — save ₦134,000 a year, priority support and exam-season updates.",
+              plan: "annual" as const,
+              cta: "Subscribe — save ₦134,000",
+            },
+          ].map((p) => (
+            <div key={p.name} className="flex flex-col rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
+              <h3 className="font-bold text-burgundy-700">{p.name}</h3>
+              <p className="mt-2 text-3xl font-bold">{p.price}</p>
+              <p className="mt-3 flex-1 text-sm text-burgundy-900/70">{p.desc}</p>
+              <PricingButton plan={p.plan} label={p.cta} />
             </div>
           ))}
         </div>
