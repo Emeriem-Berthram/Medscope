@@ -72,14 +72,14 @@ const faqs = [
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white text-teal-950">
+    <div className="min-h-screen bg-cream-50 text-burgundy-950">
       {/* Nav */}
-      <header className="sticky top-0 z-20 border-b border-teal-100 bg-white/90 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-burgundy-100 bg-cream-50/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <a href="/" className="text-xl font-bold tracking-tight text-teal-600">
+          <a href="/" className="text-xl font-bold tracking-tight text-burgundy-600">
             Medscope
           </a>
-          <nav className="hidden items-center gap-6 text-sm text-teal-800 lg:flex">
+          <nav className="hidden items-center gap-6 text-sm text-burgundy-800 lg:flex">
             <a href="/coverage">Coverage</a>
             <a href="#features">Features</a>
             <a href="/resources">Free Resources</a>
@@ -88,8 +88,8 @@ export default function Home() {
             <a href="#faq">FAQ</a>
           </nav>
           <div className="flex items-center gap-3">
-            <a href="/login" className="text-sm font-medium text-teal-800">Sign in</a>
-            <a href="/signup" className="rounded-full bg-teal-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-teal-600">
+            <a href="/login" className="text-sm font-medium text-burgundy-800">Sign in</a>
+            <a href="/signup" className="rounded-full bg-burgundy-500 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-burgundy-600">
               Get started
             </a>
           </div>
@@ -99,46 +99,47 @@ export default function Home() {
       {/* Hero */}
       <section className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-2 md:py-24">
         <div>
-          <p className="mb-4 text-sm font-semibold text-teal-600">
+          <p className="mb-4 text-sm font-semibold text-burgundy-600">
             Recall-based — built from real past exam papers
           </p>
           <h1 className="text-4xl font-bold leading-tight md:text-5xl">
             Comprehensive preparation for postgraduate medical examination success
           </h1>
-          <p className="mt-4 text-lg text-teal-800/80">
-            The question bank built specifically for NPMCN, WACP, WACS and Primaries —
-            real exam recalls, timed mocks, and analytics that tell you exactly what to
-            revise next.
+          <p className="mt-4 text-lg text-burgundy-800/80">
+            The question bank built specifically for NPMCN, WACP, WACS and
+            Primaries — real exam recalls, timed mocks, and analytics that tell
+            you exactly what to revise next. Study alone, face off against a
+            colleague, or compete with the whole ward.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <a href="/signup" className="rounded-full bg-teal-500 px-6 py-3 font-semibold text-white hover:bg-teal-600">
+            <a href="/signup" className="rounded-full bg-burgundy-500 px-6 py-3 font-semibold text-white hover:bg-burgundy-600">
               Start preparing now
             </a>
-            <a href="#how-it-works" className="rounded-full border border-teal-200 px-6 py-3 font-semibold text-teal-700 hover:bg-teal-50">
+            <a href="#how-it-works" className="rounded-full border border-burgundy-200 px-6 py-3 font-semibold text-burgundy-700 hover:bg-burgundy-50">
               See how it works
             </a>
           </div>
-          <p className="mt-4 text-sm text-teal-700/70">
+          <p className="mt-4 text-sm text-burgundy-700/70">
             Free account includes 20 questions a month and Free Resources — no card
             needed. Subscribe when you want the full bank.
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-2">
-            <span className="rounded-md border border-teal-100 px-2 py-1 text-xs font-bold tracking-widest text-teal-500">NPMCN</span>
-            <span className="rounded-md border border-teal-100 px-2 py-1 text-xs font-bold tracking-widest text-teal-500">WACP</span>
-            <span className="rounded-md border border-teal-100 px-2 py-1 text-xs font-bold tracking-widest text-teal-500">WACS</span>
-            <span className="rounded-md border border-teal-100 px-2 py-1 text-xs font-bold tracking-widest text-teal-500">PRIMARIES</span>
-            <span className="text-sm text-teal-800/60">rated by doctors who&apos;ve sat the papers</span>
+            <span className="rounded-md border border-burgundy-100 px-2 py-1 text-xs font-bold tracking-widest text-burgundy-500">NPMCN</span>
+            <span className="rounded-md border border-burgundy-100 px-2 py-1 text-xs font-bold tracking-widest text-burgundy-500">WACP</span>
+            <span className="rounded-md border border-burgundy-100 px-2 py-1 text-xs font-bold tracking-widest text-burgundy-500">WACS</span>
+            <span className="rounded-md border border-burgundy-100 px-2 py-1 text-xs font-bold tracking-widest text-burgundy-500">PRIMARIES</span>
+            <span className="text-sm text-burgundy-800/60">rated by doctors who&apos;ve sat the papers</span>
           </div>
         </div>
 
         {/* Sample question card */}
-        <div className="rounded-2xl border border-teal-100 bg-gradient-to-b from-teal-50 to-white p-6 shadow-lg">
-          <div className="flex items-center justify-between text-xs font-semibold text-teal-600">
+        <div className="rounded-2xl border border-burgundy-100 bg-gradient-to-b from-burgundy-50 to-cream-50 p-6 shadow-lg">
+          <div className="flex items-center justify-between text-xs font-semibold text-burgundy-600">
             <span>WACP · Internal Medicine</span>
             <span>Question 14 of 40</span>
           </div>
-          <p className="mt-1 text-right text-2xl font-bold text-teal-500">18:42</p>
-          <p className="mt-4 text-teal-950">
+          <p className="mt-1 text-right text-2xl font-bold text-burgundy-500">18:42</p>
+          <p className="mt-4 text-burgundy-950">
             A 34-year-old man presents with fever, tachycardia and warm peripheries. BP
             is 82/40 mmHg with a wide pulse pressure. Which type of shock is most likely?
           </p>
@@ -149,50 +150,132 @@ export default function Home() {
                   key={opt}
                   className={`rounded-lg border px-3 py-2 ${
                     i === 2
-                      ? "border-teal-400 bg-teal-50 font-semibold text-teal-700"
-                      : "border-teal-100 bg-white"
+                      ? "border-burgundy-400 bg-burgundy-50 font-semibold text-burgundy-700"
+                      : "border-burgundy-100 bg-cream-50"
                   }`}
                 >
-                  <span className="mr-2 font-bold text-teal-400">{String.fromCharCode(65 + i)}</span>
+                  <span className="mr-2 font-bold text-burgundy-400">{String.fromCharCode(65 + i)}</span>
                   {opt}
                 </li>
               )
             )}
           </ul>
           <div className="mt-6 grid grid-cols-3 gap-3 text-center text-xs">
-            <div className="rounded-xl bg-teal-500 p-3 text-white">
+            <div className="rounded-xl bg-burgundy-500 p-3 text-white">
               <p className="text-lg font-bold">72%</p>
               <p>Accuracy</p>
             </div>
-            <div className="rounded-xl border border-teal-100 p-3">
-              <p className="text-lg font-bold text-teal-600">12 days</p>
+            <div className="rounded-xl border border-burgundy-100 p-3">
+              <p className="text-lg font-bold text-burgundy-600">12 days</p>
               <p>Study streak</p>
             </div>
-            <div className="rounded-xl border border-teal-100 p-3">
-              <p className="text-sm font-bold text-teal-600">Endocrinology</p>
+            <div className="rounded-xl border border-burgundy-100 p-3">
+              <p className="text-sm font-bold text-burgundy-600">Endocrinology</p>
               <p>Weakest topic</p>
             </div>
           </div>
-          <p className="mt-4 text-center text-xs font-semibold text-teal-600">
+          <p className="mt-4 text-center text-xs font-semibold text-burgundy-600">
             Answer explained — every single question
           </p>
         </div>
       </section>
 
+      {/* Study modes — face-off visual */}
+      <section className="mx-auto max-w-6xl px-4 py-16">
+        <div className="grid items-center gap-10 md:grid-cols-2">
+          <div>
+            <h2 className="text-3xl font-bold">
+              One bank, every way to study
+            </h2>
+            <p className="mt-3 max-w-xl text-burgundy-800/80">
+              Medscope supports individual reading, group reading, and
+              competitions — the same recall questions power all three.
+            </p>
+            <div className="mt-8 space-y-4">
+              {[
+                [
+                  "Individual reading",
+                  "Work through recalls at your own pace with explanations for every question.",
+                ],
+                [
+                  "Group reading",
+                  "Create a challenge room, share the code, and take turns answering with a colleague.",
+                ],
+                [
+                  "Competitions",
+                  "Battle rooms for up to 20 doctors — fastest correct answer takes the points.",
+                ],
+              ].map(([t, b]) => (
+                <div
+                  key={t}
+                  className="rounded-2xl border border-burgundy-100 bg-cream-50 p-5"
+                >
+                  <h3 className="font-bold text-burgundy-950">{t}</h3>
+                  <p className="mt-1 text-sm text-burgundy-800/70">{b}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Face-off illustration */}
+          <div className="rounded-3xl border border-burgundy-100 bg-gradient-to-b from-burgundy-50 to-cream-50 p-10">
+            <svg
+              viewBox="0 0 320 240"
+              className="mx-auto w-full"
+              role="img"
+              aria-label="Two doctors facing off"
+            >
+              {/* ground line */}
+              <line x1="20" y1="205" x2="300" y2="205" stroke="#e5c6cd" strokeWidth="3" strokeLinecap="round" />
+              {/* left figure */}
+              <g>
+                <circle cx="105" cy="70" r="26" fill="#800020" />
+                <path d="M70 205 L78 130 Q105 112 132 130 L140 205 Z" fill="#800020" />
+                <circle cx="97" cy="66" r="3" fill="#fdfbf7" />
+                <circle cx="113" cy="66" r="3" fill="#fdfbf7" />
+                <path d="M96 80 Q105 86 114 80" stroke="#fdfbf7" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <line x1="78" y1="140" x2="52" y2="165" stroke="#800020" strokeWidth="9" strokeLinecap="round" />
+                <line x1="132" y1="140" x2="150" y2="118" stroke="#800020" strokeWidth="9" strokeLinecap="round" />
+              </g>
+              {/* right figure */}
+              <g>
+                <circle cx="215" cy="70" r="26" fill="#bc6b7c" />
+                <path d="M180 205 L188 130 Q215 112 242 130 L250 205 Z" fill="#bc6b7c" />
+                <circle cx="207" cy="66" r="3" fill="#fdfbf7" />
+                <circle cx="223" cy="66" r="3" fill="#fdfbf7" />
+                <path d="M206 80 Q215 86 224 80" stroke="#fdfbf7" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+                <line x1="188" y1="140" x2="170" y2="118" stroke="#bc6b7c" strokeWidth="9" strokeLinecap="round" />
+                <line x1="242" y1="140" x2="268" y2="165" stroke="#bc6b7c" strokeWidth="9" strokeLinecap="round" />
+              </g>
+              {/* VS badge */}
+              <circle cx="160" cy="100" r="30" fill="#fdfbf7" stroke="#800020" strokeWidth="3" />
+              <text x="160" y="110" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="24" fill="#800020">VS</text>
+              {/* spark lines */}
+              <line x1="148" y1="60" x2="140" y2="44" stroke="#d19da8" strokeWidth="3" strokeLinecap="round" />
+              <line x1="172" y1="60" x2="180" y2="44" stroke="#d19da8" strokeWidth="3" strokeLinecap="round" />
+              <line x1="160" y1="52" x2="160" y2="34" stroke="#d19da8" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <p className="mt-4 text-center text-sm font-semibold text-burgundy-700">
+              Challenge room — two doctors, one question bank
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Features */}
-      <section id="features" className="bg-teal-50/50 py-16">
+      <section id="features" className="bg-burgundy-50/50 py-16">
         <div className="mx-auto max-w-6xl px-4">
-          <p className="text-sm font-semibold text-teal-600">Everything you need</p>
+          <p className="text-sm font-semibold text-burgundy-600">Everything you need</p>
           <h2 className="mt-2 text-3xl font-bold">Built for the exam you&apos;re actually sitting</h2>
-          <p className="mt-3 max-w-2xl text-teal-800/80">
+          <p className="mt-3 max-w-2xl text-burgundy-800/80">
             Not a generic international bank with a local label on it. Every feature
             exists because candidates asked for it.
           </p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {features.map((f) => (
-              <div key={f.title} className="rounded-2xl border border-teal-100 bg-white p-6">
-                <h3 className="text-lg font-bold text-teal-700">{f.title}</h3>
-                <p className="mt-2 text-sm text-teal-900/70">{f.body}</p>
+              <div key={f.title} className="rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
+                <h3 className="text-lg font-bold text-burgundy-700">{f.title}</h3>
+                <p className="mt-2 text-sm text-burgundy-900/70">{f.body}</p>
               </div>
             ))}
           </div>
@@ -201,9 +284,9 @@ export default function Home() {
 
       {/* Resources */}
       <section id="resources" className="mx-auto max-w-6xl px-4 py-16">
-        <p className="text-sm font-semibold text-teal-600">Free with every account</p>
+        <p className="text-sm font-semibold text-burgundy-600">Free with every account</p>
         <h2 className="mt-2 text-3xl font-bold">Free Resources for the clinical exam</h2>
-        <p className="mt-3 max-w-2xl text-teal-800/80">
+        <p className="mt-3 max-w-2xl text-burgundy-800/80">
           The written paper is only half of it. Free Resources prepare you for the
           clinicals — how to examine, what to say, and what the examiner will ask next —
           written for your faculty and checked by clinicians.
@@ -223,33 +306,33 @@ export default function Home() {
               "Tables, scores and classifications to revise the night before, with pearls and the pitfalls that cost candidates marks.",
             ],
           ].map(([t, b]) => (
-            <div key={t} className="rounded-2xl border border-teal-100 p-6">
-              <h3 className="font-bold text-teal-700">{t}</h3>
-              <p className="mt-2 text-sm text-teal-900/70">{b}</p>
+            <div key={t} className="rounded-2xl border border-burgundy-100 p-6">
+              <h3 className="font-bold text-burgundy-700">{t}</h3>
+              <p className="mt-2 text-sm text-burgundy-900/70">{b}</p>
             </div>
           ))}
         </div>
-        <p className="mt-6 text-sm text-teal-800/70">
+        <p className="mt-6 text-sm text-burgundy-800/70">
           A selection is open to read now — no account needed. Create a free account for
           your whole faculty&apos;s library. New material added faculty by faculty.
         </p>
-        <a href="/resources" className="mt-4 inline-block rounded-full bg-teal-500 px-6 py-3 font-semibold text-white hover:bg-teal-600">
+        <a href="/resources" className="mt-4 inline-block rounded-full bg-burgundy-500 px-6 py-3 font-semibold text-white hover:bg-burgundy-600">
           Read the Free Resources
         </a>
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="bg-teal-600 py-16 text-white">
+      <section id="how-it-works" className="bg-burgundy-600 py-16 text-white">
         <div className="mx-auto max-w-6xl px-4">
           <h2 className="text-3xl font-bold">Three steps from signup to exam day</h2>
           <div className="mt-10 grid gap-8 md:grid-cols-3">
             {steps.map((s) => (
               <div key={s.n}>
-                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-teal-400 font-bold text-teal-950">
+                <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-burgundy-400 font-bold text-burgundy-950">
                   {s.n}
                 </span>
                 <h3 className="mt-4 text-lg font-bold">{s.title}</h3>
-                <p className="mt-2 text-sm text-teal-100">{s.body}</p>
+                <p className="mt-2 text-sm text-burgundy-100">{s.body}</p>
               </div>
             ))}
           </div>
@@ -259,7 +342,7 @@ export default function Home() {
       {/* Pricing */}
       <section id="pricing" className="mx-auto max-w-6xl px-4 py-16">
         <h2 className="text-3xl font-bold">Simple pricing</h2>
-        <p className="mt-3 max-w-2xl text-teal-800/80">
+        <p className="mt-3 max-w-2xl text-burgundy-800/80">
           Start free. Subscribe to the college and faculty you&apos;re actually sitting —
           you never pay for a bank you won&apos;t open.
         </p>
@@ -269,13 +352,13 @@ export default function Home() {
             ["Monthly", "₦12,000/mo", "Full bank for your college & faculty, timed mocks, analytics, offline packs."],
             ["Annual", "₦10,000/yr", "Everything in Monthly — save ₦134,000 a year, priority support and exam-season updates."],
           ].map(([name, price, desc]) => (
-            <div key={name} className="flex flex-col rounded-2xl border border-teal-100 p-6">
-              <h3 className="font-bold text-teal-700">{name}</h3>
+            <div key={name} className="flex flex-col rounded-2xl border border-burgundy-100 p-6">
+              <h3 className="font-bold text-burgundy-700">{name}</h3>
               <p className="mt-2 text-3xl font-bold">{price}</p>
-              <p className="mt-3 flex-1 text-sm text-teal-900/70">{desc}</p>
+              <p className="mt-3 flex-1 text-sm text-burgundy-900/70">{desc}</p>
               <a
                 href={name === "Free" ? "/signup" : "/login"}
-                className="mt-6 rounded-full bg-teal-500 px-4 py-2.5 text-center font-semibold text-white hover:bg-teal-600"
+                className="mt-6 rounded-full bg-burgundy-500 px-4 py-2.5 text-center font-semibold text-white hover:bg-burgundy-600"
               >
                 {name === "Free" ? "Create free account" : "Subscribe"}
               </a>
@@ -285,14 +368,14 @@ export default function Home() {
       </section>
 
       {/* Reviews */}
-      <section id="reviews" className="bg-teal-50/50 py-16">
+      <section id="reviews" className="bg-burgundy-50/50 py-16">
         <div className="mx-auto max-w-2xl px-4 text-center">
-          <p className="text-sm font-semibold text-teal-600">From the wards</p>
+          <p className="text-sm font-semibold text-burgundy-600">From the wards</p>
           <h2 className="mt-2 text-3xl font-bold">What doctors say after using it</h2>
-          <p className="mt-4 text-teal-800/80">Be the first to share your experience.</p>
+          <p className="mt-4 text-burgundy-800/80">Be the first to share your experience.</p>
           <a
             href="/login"
-            className="mt-6 inline-block rounded-full border border-teal-200 px-6 py-3 font-semibold text-teal-700 hover:bg-teal-50"
+            className="mt-6 inline-block rounded-full border border-burgundy-200 px-6 py-3 font-semibold text-burgundy-700 hover:bg-burgundy-50"
           >
             Sign in to leave a review
           </a>
@@ -302,12 +385,12 @@ export default function Home() {
       {/* FAQ */}
       <section id="faq" className="mx-auto max-w-3xl px-4 py-16">
         <h2 className="text-3xl font-bold">Questions, answered</h2>
-        <p className="mt-3 text-teal-800/80">Still unsure about something? Talk to us — a real person replies.</p>
-        <div className="mt-8 divide-y divide-teal-100">
+        <p className="mt-3 text-burgundy-800/80">Still unsure about something? Talk to us — a real person replies.</p>
+        <div className="mt-8 divide-y divide-burgundy-100">
           {faqs.map((f) => (
             <div key={f.q} className="py-5">
-              <h3 className="font-bold text-teal-700">{f.q}</h3>
-              <p className="mt-1 text-sm text-teal-900/70">{f.a}</p>
+              <h3 className="font-bold text-burgundy-700">{f.q}</h3>
+              <p className="mt-1 text-sm text-burgundy-900/70">{f.a}</p>
             </div>
           ))}
         </div>
@@ -316,36 +399,36 @@ export default function Home() {
       {/* Final CTA */}
       <section className="mx-auto max-w-6xl px-4 py-16 text-center">
         <h2 className="text-3xl font-bold">Ready to walk in prepared?</h2>
-        <p className="mt-3 text-teal-800/80">
+        <p className="mt-3 text-burgundy-800/80">
           Create a free account and start on real recall questions and Free Resources
           today. No card needed to look around.
         </p>
         <div className="mt-8 flex flex-wrap justify-center gap-4">
-          <a href="/signup" className="rounded-full bg-teal-500 px-8 py-4 font-semibold text-white hover:bg-teal-600">
+          <a href="/signup" className="rounded-full bg-burgundy-500 px-8 py-4 font-semibold text-white hover:bg-burgundy-600">
             Create free account
           </a>
-          <a href="/coverage" className="rounded-full border border-teal-200 px-8 py-4 font-semibold text-teal-700 hover:bg-teal-50">
+          <a href="/coverage" className="rounded-full border border-burgundy-200 px-8 py-4 font-semibold text-burgundy-700 hover:bg-burgundy-50">
             Learn more about us
           </a>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-teal-100 py-10">
-        <p className="mx-auto mb-8 max-w-6xl px-4 text-sm text-teal-800/70">
+      <footer className="border-t border-burgundy-100 py-10">
+        <p className="mx-auto mb-8 max-w-6xl px-4 text-sm text-burgundy-800/70">
           Join doctors across Nigeria and West Africa preparing right now
         </p>
         <div className="mx-auto grid max-w-6xl gap-8 px-4 md:grid-cols-4">
           <div>
-            <p className="text-xl font-bold text-teal-600">Medscope</p>
-            <p className="mt-2 text-sm text-teal-800/70">
+            <p className="text-xl font-bold text-burgundy-600">Medscope</p>
+            <p className="mt-2 text-sm text-burgundy-800/70">
               Exam-recall question bank, mock exams and performance analytics for doctors
               sitting NPMCN, WACP and WACS.
             </p>
           </div>
           <div>
-            <p className="font-bold text-teal-950">Product</p>
-            <ul className="mt-2 space-y-1 text-sm text-teal-800/70">
+            <p className="font-bold text-burgundy-950">Product</p>
+            <ul className="mt-2 space-y-1 text-sm text-burgundy-800/70">
               <li><a href="#features">Features</a></li>
               <li><a href="#how-it-works">How it works</a></li>
               <li><a href="/resources">Free Resources</a></li>
@@ -355,23 +438,23 @@ export default function Home() {
             </ul>
           </div>
           <div>
-            <p className="font-bold text-teal-950">Company</p>
-            <ul className="mt-2 space-y-1 text-sm text-teal-800/70">
+            <p className="font-bold text-burgundy-950">Company</p>
+            <ul className="mt-2 space-y-1 text-sm text-burgundy-800/70">
               <li><a href="/coverage">About</a></li>
               <li><a href="mailto:support@medscope.com">Contact support</a></li>
               <li><a href="mailto:support@medscope.com">support@medscope.com</a></li>
             </ul>
           </div>
           <div>
-            <p className="font-bold text-teal-950">Legal</p>
-            <ul className="mt-2 space-y-1 text-sm text-teal-800/70">
+            <p className="font-bold text-burgundy-950">Legal</p>
+            <ul className="mt-2 space-y-1 text-sm text-burgundy-800/70">
               <li><a href="#">Terms of Service</a></li>
               <li><a href="#">Privacy Policy</a></li>
               <li><a href="#">Acceptable Use</a></li>
             </ul>
           </div>
         </div>
-        <p className="mx-auto mt-8 max-w-6xl px-4 text-xs text-teal-800/50">
+        <p className="mx-auto mt-8 max-w-6xl px-4 text-xs text-burgundy-800/50">
           © 2026 Medscope. All rights reserved.
         </p>
       </footer>

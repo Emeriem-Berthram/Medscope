@@ -10,18 +10,18 @@ export const metadata = {
 export default function SignupPage() {
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-14">
-      <div className="rounded-2xl border border-teal-100 p-8">
-        <h1 className="text-3xl font-bold text-teal-950">
+      <div className="rounded-2xl border border-burgundy-100 p-8">
+        <h1 className="text-3xl font-bold text-burgundy-950">
           Create your free account
         </h1>
-        <p className="mt-2 text-sm text-teal-800/70">
+        <p className="mt-2 text-sm text-burgundy-800/70">
           20 free questions a month and the Free Resources library. No card
           needed.
         </p>
         <AuthForm mode="signup" />
-        <p className="mt-5 text-center text-sm text-teal-800/70">
+        <p className="mt-5 text-center text-sm text-burgundy-800/70">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-teal-600 hover:underline">
+          <Link href="/login" className="font-semibold text-burgundy-600 hover:underline">
             Sign in
           </Link>
         </p>

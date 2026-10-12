@@ -73,10 +73,10 @@ export default function MockExam() {
   if (pool.length === 0) {
     return (
       <div className="mx-auto max-w-xl">
-        <h1 className="text-2xl font-bold text-teal-950">Timed mock exam</h1>
-        <div className="mt-6 rounded-2xl border border-teal-100 bg-white p-10 text-center">
-          <p className="font-bold text-teal-950">No questions yet</p>
-          <p className="mt-2 text-sm text-teal-800/70">
+        <h1 className="text-2xl font-bold text-burgundy-950">Timed mock exam</h1>
+        <div className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-10 text-center">
+          <p className="font-bold text-burgundy-950">No questions yet</p>
+          <p className="mt-2 text-sm text-burgundy-800/70">
             Mock exams unlock as soon as questions are uploaded to the
             bank.
           </p>
@@ -88,29 +88,29 @@ export default function MockExam() {
   if (phase === "intro") {
     return (
       <div className="mx-auto max-w-xl">
-        <h1 className="text-2xl font-bold text-teal-950">Timed mock exam</h1>
-        <p className="mt-1 text-sm text-teal-800/70">
+        <h1 className="text-2xl font-bold text-burgundy-950">Timed mock exam</h1>
+        <p className="mt-1 text-sm text-burgundy-800/70">
           {user.faculty ? `${user.faculty} mock` : "Mixed mock"} under real exam
           conditions.
         </p>
-        <section className="mt-6 rounded-2xl border border-teal-100 bg-white p-6">
+        <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between">
-              <dt className="text-teal-800/70">Questions</dt>
-              <dd className="font-semibold text-teal-950">{MOCK_LENGTH}</dd>
+              <dt className="text-burgundy-800/70">Questions</dt>
+              <dd className="font-semibold text-burgundy-950">{MOCK_LENGTH}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-teal-800/70">Time limit</dt>
-              <dd className="font-semibold text-teal-950">5 minutes</dd>
+              <dt className="text-burgundy-800/70">Time limit</dt>
+              <dd className="font-semibold text-burgundy-950">5 minutes</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-teal-800/70">Scoring</dt>
-              <dd className="font-semibold text-teal-950">Instant, question by question</dd>
+              <dt className="text-burgundy-800/70">Scoring</dt>
+              <dd className="font-semibold text-burgundy-950">Instant, question by question</dd>
             </div>
           </dl>
           <button
             onClick={start}
-            className="mt-6 w-full rounded-full bg-teal-500 py-3 font-semibold text-white hover:bg-teal-600"
+            className="mt-6 w-full rounded-full bg-burgundy-500 py-3 font-semibold text-white hover:bg-burgundy-600"
           >
             Start mock
           </button>
@@ -124,10 +124,10 @@ export default function MockExam() {
     const pct = Math.round((score / questions.length) * 100);
     return (
       <div className="mx-auto max-w-2xl">
-        <h1 className="text-2xl font-bold text-teal-950">Mock complete</h1>
-        <section className="mt-6 rounded-2xl border border-teal-100 bg-white p-6 text-center">
-          <p className="text-5xl font-bold text-teal-600">{pct}%</p>
-          <p className="mt-2 text-sm text-teal-800/70">
+        <h1 className="text-2xl font-bold text-burgundy-950">Mock complete</h1>
+        <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6 text-center">
+          <p className="text-5xl font-bold text-burgundy-600">{pct}%</p>
+          <p className="mt-2 text-sm text-burgundy-800/70">
             {score} of {questions.length} correct
           </p>
           <div className="mt-6 grid gap-3 text-left">
@@ -136,16 +136,16 @@ export default function MockExam() {
                 key={q.id}
                 className={`rounded-xl border p-4 ${
                   answers[q.id] === q.correct
-                    ? "border-teal-200 bg-teal-50/50"
+                    ? "border-burgundy-200 bg-burgundy-50/50"
                     : "border-red-200 bg-red-50/50"
                 }`}
               >
-                <p className="text-sm font-semibold text-teal-950">
+                <p className="text-sm font-semibold text-burgundy-950">
                   {i + 1}. {q.text}
                 </p>
                 <p className="mt-1 text-sm">
                   {answers[q.id] === q.correct ? (
-                    <span className="font-semibold text-teal-700">
+                    <span className="font-semibold text-burgundy-700">
                       Correct — {q.correct}
                     </span>
                   ) : (
@@ -154,13 +154,13 @@ export default function MockExam() {
                     </span>
                   )}
                 </p>
-                <p className="mt-1 text-xs text-teal-900/70">{q.explanation}</p>
+                <p className="mt-1 text-xs text-burgundy-900/70">{q.explanation}</p>
               </div>
             ))}
           </div>
           <button
             onClick={start}
-            className="mt-6 rounded-full bg-teal-500 px-6 py-3 font-semibold text-white hover:bg-teal-600"
+            className="mt-6 rounded-full bg-burgundy-500 px-6 py-3 font-semibold text-white hover:bg-burgundy-600"
           >
             Sit another mock
           </button>
@@ -176,16 +176,16 @@ export default function MockExam() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-teal-950">Mock exam</h1>
+        <h1 className="text-2xl font-bold text-burgundy-950">Mock exam</h1>
         <p
           className={`rounded-full px-4 py-1.5 font-mono font-bold ${
-            secondsLeft < 60 ? "bg-red-100 text-red-700" : "bg-teal-100 text-teal-800"
+            secondsLeft < 60 ? "bg-red-100 text-red-700" : "bg-burgundy-100 text-burgundy-800"
           }`}
         >
           {mm}:{ss}
         </p>
       </div>
-      <p className="mt-1 text-sm text-teal-800/70">
+      <p className="mt-1 text-sm text-burgundy-800/70">
         Question {current + 1} of {questions.length}
       </p>
 
@@ -194,17 +194,17 @@ export default function MockExam() {
           e.preventDefault();
           finish();
         }}
-        className="mt-6 rounded-2xl border border-teal-100 bg-white p-6"
+        className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6"
       >
-        <p className="text-lg text-teal-950">{q.text}</p>
+        <p className="text-lg text-burgundy-950">{q.text}</p>
         <div className="mt-4 space-y-2">
           {q.options.map((opt, i) => (
             <label
               key={opt}
               className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 ${
                 answers[q.id] === opt
-                  ? "border-teal-500 bg-teal-50"
-                  : "border-teal-100 hover:bg-teal-50"
+                  ? "border-burgundy-500 bg-burgundy-50"
+                  : "border-burgundy-100 hover:bg-burgundy-50"
               }`}
             >
               <input
@@ -212,10 +212,10 @@ export default function MockExam() {
                 name={`mock-${q.id}`}
                 checked={answers[q.id] === opt}
                 onChange={() => select(q.id, opt)}
-                className="accent-teal-500"
+                className="accent-burgundy-500"
               />
-              <span className="font-bold text-teal-400">{String.fromCharCode(65 + i)}</span>
-              <span className="text-teal-950">{opt}</span>
+              <span className="font-bold text-burgundy-400">{String.fromCharCode(65 + i)}</span>
+              <span className="text-burgundy-950">{opt}</span>
             </label>
           ))}
         </div>
@@ -224,7 +224,7 @@ export default function MockExam() {
             type="button"
             onClick={() => setCurrent((c) => Math.max(0, c - 1))}
             disabled={current === 0}
-            className="rounded-full border border-teal-200 px-5 py-2 text-sm font-semibold text-teal-700 hover:bg-teal-50 disabled:opacity-40"
+            className="rounded-full border border-burgundy-200 px-5 py-2 text-sm font-semibold text-burgundy-700 hover:bg-burgundy-50 disabled:opacity-40"
           >
             Previous
           </button>
@@ -232,14 +232,14 @@ export default function MockExam() {
             <button
               type="button"
               onClick={() => setCurrent((c) => c + 1)}
-              className="rounded-full bg-teal-500 px-5 py-2 text-sm font-semibold text-white hover:bg-teal-600"
+              className="rounded-full bg-burgundy-500 px-5 py-2 text-sm font-semibold text-white hover:bg-burgundy-600"
             >
               Next
             </button>
           ) : (
             <button
               type="submit"
-              className="rounded-full bg-teal-600 px-5 py-2 text-sm font-semibold text-white hover:bg-teal-700"
+              className="rounded-full bg-burgundy-600 px-5 py-2 text-sm font-semibold text-white hover:bg-burgundy-700"
             >
               Submit mock
             </button>

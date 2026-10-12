@@ -53,23 +53,23 @@ const COLLEGES = [
 export default function Coverage() {
   return (
     <main className="mx-auto max-w-6xl px-4 py-14">
-      <h1 className="text-4xl font-bold text-teal-950">Is your exam covered?</h1>
-      <p className="mt-3 max-w-2xl text-teal-800/80">
+      <h1 className="text-4xl font-bold text-burgundy-950">Is your exam covered?</h1>
+      <p className="mt-3 max-w-2xl text-burgundy-800/80">
         Every college and faculty in the bank, with the number of questions in each. Subscribe to the
         college and faculty you&apos;re actually sitting — you never pay for a bank you won&apos;t open.
       </p>
       <div className="mt-10 grid gap-8 md:grid-cols-2">
         {COLLEGES.map((c) => (
-          <section key={c.college} className="rounded-2xl border border-teal-100 p-6">
+          <section key={c.college} className="rounded-2xl border border-burgundy-100 p-6">
             <div className="flex items-baseline justify-between">
-              <h2 className="text-2xl font-bold text-teal-700">{c.college}</h2>
-              <span className="text-sm text-teal-800/60">{c.note}</span>
+              <h2 className="text-2xl font-bold text-burgundy-700">{c.college}</h2>
+              <span className="text-sm text-burgundy-800/60">{c.note}</span>
             </div>
-            <ul className="mt-4 divide-y divide-teal-50">
+            <ul className="mt-4 divide-y divide-burgundy-50">
               {c.faculties.map((f) => (
                 <li key={f.name} className="flex items-center justify-between py-2.5">
-                  <span className="text-teal-950">{f.name}</span>
-                  <span className="text-sm font-semibold text-teal-600">
+                  <span className="text-burgundy-950">{f.name}</span>
+                  <span className="text-sm font-semibold text-burgundy-600">
                     {f.count.toLocaleString()} questions
                   </span>
                 </li>
@@ -78,15 +78,15 @@ export default function Coverage() {
           </section>
         ))}
       </div>
-      <div className="mt-12 rounded-2xl bg-teal-50 p-8 text-center">
-        <h2 className="text-2xl font-bold text-teal-950">Found your faculty?</h2>
-        <p className="mx-auto mt-2 max-w-xl text-teal-800/80">
+      <div className="mt-12 rounded-2xl bg-burgundy-50 p-8 text-center">
+        <h2 className="text-2xl font-bold text-burgundy-950">Found your faculty?</h2>
+        <p className="mx-auto mt-2 max-w-xl text-burgundy-800/80">
           Every account gets 20 free questions every month. Open your faculty, read real stems and
           explanations, and get a feel for the platform before you pay for anything.
         </p>
         <a
           href="/auth?mode=signup"
-          className="mt-6 inline-block rounded-full bg-teal-500 px-6 py-3 font-semibold text-white hover:bg-teal-600"
+          className="mt-6 inline-block rounded-full bg-burgundy-500 px-6 py-3 font-semibold text-white hover:bg-burgundy-600"
         >
           Create a free account
         </a>

@@ -44,16 +44,16 @@ const RESOURCES: Record<string, { type: string; title: string }[]> = {
 };
 
 const TYPE_STYLE: Record<string, string> = {
-  Checklist: "bg-teal-500 text-white",
-  "Quick reference": "border border-teal-200 text-teal-700",
-  "Case presentation": "bg-teal-100 text-teal-900",
+  Checklist: "bg-burgundy-500 text-white",
+  "Quick reference": "border border-burgundy-200 text-burgundy-700",
+  "Case presentation": "bg-burgundy-100 text-burgundy-900",
 };
 
 export default function Resources() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-teal-950">Free Resources</h1>
-      <p className="mt-1 text-sm text-teal-800/70">
+      <h1 className="text-2xl font-bold text-burgundy-950">Free Resources</h1>
+      <p className="mt-1 text-sm text-burgundy-800/70">
         Clinical exam prep — how to examine, what to say, and what the
         examiner will ask next. Written for your faculty and checked by
         clinicians.
@@ -62,16 +62,16 @@ export default function Resources() {
         {Object.entries(RESOURCES).map(([faculty, items]) => (
           <section
             key={faculty}
-            className="rounded-2xl border border-teal-100 bg-white p-6"
+            className="rounded-2xl border border-burgundy-100 bg-cream-50 p-6"
           >
-            <h2 className="text-lg font-bold text-teal-700">{faculty}</h2>
+            <h2 className="text-lg font-bold text-burgundy-700">{faculty}</h2>
             <ul className="mt-4 space-y-3">
               {items.map((item) => (
                 <li
                   key={item.title}
-                  className="flex items-center justify-between gap-4 rounded-xl border border-teal-50 p-3"
+                  className="flex items-center justify-between gap-4 rounded-xl border border-burgundy-50 p-3"
                 >
-                  <p className="font-medium text-teal-950">{item.title}</p>
+                  <p className="font-medium text-burgundy-950">{item.title}</p>
                   <span
                     className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${TYPE_STYLE[item.type]}`}
                   >

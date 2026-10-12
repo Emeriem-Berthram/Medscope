@@ -36,36 +36,36 @@ export default function AuthForm({ mode }: { mode: "signin" | "signup" }) {
     <form onSubmit={submit} className="mt-6 space-y-4">
       {mode === "signup" && (
         <label className="block">
-          <span className="text-sm font-medium text-teal-900">Full name</span>
+          <span className="text-sm font-medium text-burgundy-900">Full name</span>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
-            className="mt-1 w-full rounded-lg border border-teal-200 px-3 py-2.5 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+            className="mt-1 w-full rounded-lg border border-burgundy-200 px-3 py-2.5 outline-none focus:border-burgundy-500 focus:ring-2 focus:ring-burgundy-100"
             placeholder="Dr. Amina Yusuf"
           />
         </label>
       )}
       <label className="block">
-        <span className="text-sm font-medium text-teal-900">Email</span>
+        <span className="text-sm font-medium text-burgundy-900">Email</span>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="mt-1 w-full rounded-lg border border-teal-200 px-3 py-2.5 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+          className="mt-1 w-full rounded-lg border border-burgundy-200 px-3 py-2.5 outline-none focus:border-burgundy-500 focus:ring-2 focus:ring-burgundy-100"
           placeholder="you@example.com"
         />
       </label>
       <label className="block">
-        <span className="text-sm font-medium text-teal-900">Password</span>
+        <span className="text-sm font-medium text-burgundy-900">Password</span>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="mt-1 w-full rounded-lg border border-teal-200 px-3 py-2.5 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-100"
+          className="mt-1 w-full rounded-lg border border-burgundy-200 px-3 py-2.5 outline-none focus:border-burgundy-500 focus:ring-2 focus:ring-burgundy-100"
           placeholder="••••••••"
         />
       </label>
@@ -79,7 +79,7 @@ export default function AuthForm({ mode }: { mode: "signin" | "signup" }) {
       <button
         type="submit"
         disabled={busy}
-        className="w-full rounded-full bg-teal-500 py-3 font-semibold text-white hover:bg-teal-600 disabled:opacity-60"
+        className="w-full rounded-full bg-burgundy-500 py-3 font-semibold text-white hover:bg-burgundy-600 disabled:opacity-60"
       >
         {busy
           ? "Please wait…"
