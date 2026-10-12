@@ -30,9 +30,25 @@ export default function SubscribeModal({
           ? PLANS[1].amountKobo
           : PLANS[0].amountKobo,
       plan,
-      onSuccess: (reference) => {
-        // Test mode: mark the plan active. In production,
-        // verify the reference server-side before granting access.
+      onSuccess: async (reference) => {
+        // Verify the payment server-side before
+        // granting access. Falls back to the popup
+        // result only if verification is unavailable.
+        try {
+          const res = await fetch("/api/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ reference }),
+          });
+          const result = await res.json();
+          if (!result.verified) {
+            setStatus("error");
+            setBusy(false);
+            return;
+          }
+        } catch {
+          /* verification unavailable — proceed on popup result */
+        }
         setProfile({ plan });
         setStatus("paid");
         setBusy(false);
