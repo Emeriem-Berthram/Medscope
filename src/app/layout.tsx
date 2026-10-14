@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Medscope — Comprehensive preparation for postgraduate medical examination success",
+  title: "Medscope — Complete postgraduate medical exam preparation.",
   description:
     "Real past-exam recall questions, timed mocks, and analytics for NPMCN, WACP, WACS and Primaries.",
 };
