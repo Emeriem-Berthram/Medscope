@@ -11,3 +11,4 @@ npmout*.err
 .DS_Store
 tsconfig.tsbuildinfo
 supabase.exe
+.vercel
