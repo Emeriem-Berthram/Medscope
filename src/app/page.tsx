@@ -343,45 +343,23 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Battle room illustration */}
-          <div className="rounded-3xl bg-cream-50 p-8 text-burgundy-950">
-            <svg
-              viewBox="0 0 360 260"
-              className="mx-auto w-full"
-              role="img"
-              aria-label="Battle room scoreboard"
-            >
-              {/* scoreboard */}
-              <rect x="110" y="10" width="140" height="46" rx="8" fill="#800020" />
-              <text x="180" y="40" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="20" fill="#fdfbf7">LIVE</text>
-              {/* three figures */}
-              {[90, 180, 270].map((cx, i) => (
-                <g key={cx}>
-                  <circle cx={cx} cy="120" r="22" fill={i === 0 ? "#800020" : i === 1 ? "#bc6b7c" : "#d19da8"} />
-                  <path d={`M${cx - 30} 235 L${cx - 24} 165 Q${cx} 150 ${cx + 24} 165 L${cx + 30} 235 Z`} fill={i === 0 ? "#800020" : i === 1 ? "#bc6b7c" : "#d19da8"} />
-                  {/* arm raised */}
-                  <line x1={cx - 24} y1="175" x2={cx - 44} y2="140" stroke={i === 0 ? "#800020" : i === 1 ? "#bc6b7c" : "#d19da8"} strokeWidth="8" strokeLinecap="round" />
-                </g>
-              ))}
-              {/* timer badge */}
-              <circle cx="320" cy="60" r="24" fill="#fdfbf7" stroke="#800020" strokeWidth="3" />
-              <text x="320" y="67" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="16" fill="#800020">40s</text>
-            </svg>
-            <div className="mt-2 space-y-1">
-              {[
-                ["#1", "Dr. Chidi O.", "6.0"],
-                ["#2", "Dr. Fatima B.", "4.0"],
-                ["#3", "Dr. Emeka N.", "2.0"],
-              ].map((r) => (
-                <div
-                  key={r[0]}
-                  className="flex items-center justify-between rounded-lg border border-burgundy-100 bg-cream-50 px-3 py-1.5 text-sm"
-                >
-                  <span className="text-burgundy-600">{r[0]}</span>
-                  <span className="font-medium text-burgundy-950">{r[1]}</span>
-                  <span className="font-bold text-burgundy-600">{r[2]}</span>
-                </div>
-              ))}
+          {/* Battle room illustration replaced with battle-live-arena.png */}
+          <div className="overflow-hidden rounded-3xl border border-burgundy-200/40 bg-slate-950 p-2 shadow-2xl">
+            <div className="overflow-hidden rounded-2xl border border-slate-800">
+              <Image
+                src="/battle-live-arena.png"
+                alt="Medscope Battle Room — Live Arena Interface"
+                width={1200}
+                height={750}
+                unoptimized
+                priority
+                className="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+              />
+            </div>
+            <div className="p-3 text-center">
+              <p className="text-xs font-semibold text-slate-300">
+                Live Battle Room — real-time clinical recall showdown with live leaderboard & chat
+              </p>
             </div>
           </div>
         </div>
