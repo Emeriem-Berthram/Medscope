@@ -185,98 +185,120 @@ const TOPIC_CHIPS = [
   "Internal Medicine",
 ];
 
-// Clinical ECG strip component matching Image 3
+// Clinical ECG strip component matching Image 3 (Leads II, III, aVF)
 function ClinicalEcgStrip() {
+  const [showHdVisual, setShowHdVisual] = useState(false);
+
   return (
-    <div className="overflow-hidden rounded-xl border border-rose-300/60 bg-[#fff5f6] p-3 shadow-inner">
-      <div className="flex items-center justify-between text-[10px] font-bold text-rose-800/80 mb-1">
-        <span>Standard 12-Lead ECG (25mm/s, 10mm/mV)</span>
-        <span>Rhythm: Normal Sinus</span>
+    <div className="space-y-2">
+      <div className="overflow-hidden rounded-xl border border-rose-300/60 bg-[#fff5f6] p-3 shadow-inner">
+        <div className="flex items-center justify-between text-[10px] font-bold text-rose-800/90 mb-1.5">
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-rose-600 animate-pulse" />
+            12-Lead Diagnostic ECG · Leads II, III & aVF (ST Elevation)
+          </span>
+          <button
+            type="button"
+            onClick={() => setShowHdVisual(!showHdVisual)}
+            className="rounded bg-rose-100 hover:bg-rose-200 text-rose-900 px-2 py-0.5 text-[9px] font-bold transition flex items-center gap-1"
+          >
+            <span>🔍</span>
+            <span>{showHdVisual ? "Hide HD Reference" : "View HD Diagnostic Strip"}</span>
+          </button>
+        </div>
+
+        {showHdVisual ? (
+          <div className="overflow-hidden rounded-lg border border-slate-700 bg-slate-950 p-1">
+            <Image
+              src="/battle-live-arena.jpg"
+              alt="High Definition Battle Arena Clinical Diagnostic"
+              width={1024}
+              height={765}
+              unoptimized
+              priority
+              className="h-auto w-full object-cover rounded"
+            />
+          </div>
+        ) : (
+          <svg
+            viewBox="0 0 600 135"
+            className="h-auto w-full select-none"
+            preserveAspectRatio="none"
+          >
+            <defs>
+              <pattern
+                id="ecg-small-grid-hd"
+                width="6"
+                height="6"
+                patternUnits="userSpaceOnUse"
+              >
+                <path
+                  d="M 6 0 L 0 0 0 6"
+                  fill="none"
+                  stroke="#fca5a5"
+                  strokeWidth="0.45"
+                  strokeOpacity="0.65"
+                />
+              </pattern>
+              <pattern
+                id="ecg-big-grid-hd"
+                width="30"
+                height="30"
+                patternUnits="userSpaceOnUse"
+              >
+                <rect width="30" height="30" fill="url(#ecg-small-grid-hd)" />
+                <path
+                  d="M 30 0 L 0 0 0 30"
+                  fill="none"
+                  stroke="#f87171"
+                  strokeWidth="0.95"
+                  strokeOpacity="0.8"
+                />
+              </pattern>
+            </defs>
+
+            {/* Pink Grid Background */}
+            <rect width="600" height="135" fill="url(#ecg-big-grid-hd)" />
+
+            {/* Lead II Line (Marked ST Elevation) */}
+            <text x="8" y="26" fill="#881337" fontSize="12" fontWeight="bold">
+              II
+            </text>
+            <path
+              d="M 35 25 Q 48 25 55 21 Q 60 25 68 25 L 72 31 L 76 6 L 80 34 L 84 25 L 94 18 Q 110 16 128 25 L 165 25 M 175 25 Q 188 25 195 21 Q 200 25 208 25 L 212 31 L 216 6 L 220 34 L 224 25 L 234 18 Q 250 16 268 25 L 305 25 M 315 25 Q 328 25 335 21 Q 340 25 348 25 L 352 31 L 356 6 L 360 34 L 364 25 L 374 18 Q 390 16 408 25 L 445 25 M 455 25 Q 468 25 475 21 Q 480 25 488 25 L 492 31 L 496 6 L 500 34 L 504 25 L 514 18 Q 530 16 548 25 L 590 25"
+              fill="none"
+              stroke="#881337"
+              strokeWidth="1.9"
+            />
+
+            {/* Lead III Line (Marked ST Elevation) */}
+            <text x="8" y="70" fill="#881337" fontSize="12" fontWeight="bold">
+              III
+            </text>
+            <path
+              d="M 35 69 Q 48 69 55 65 Q 60 69 68 69 L 72 75 L 76 50 L 80 78 L 84 69 L 94 62 Q 110 60 128 69 L 165 69 M 175 69 Q 188 69 195 65 Q 200 69 208 69 L 212 75 L 216 50 L 220 78 L 224 69 L 234 62 Q 250 60 268 69 L 305 69 M 315 69 Q 328 69 335 65 Q 340 69 348 69 L 352 75 L 356 50 L 360 78 L 364 69 L 374 62 Q 390 60 408 69 L 445 69 M 455 69 Q 468 69 475 65 Q 480 69 488 69 L 492 75 L 496 50 L 500 78 L 504 69 L 514 62 Q 530 60 548 69 L 590 69"
+              fill="none"
+              stroke="#9f1239"
+              strokeWidth="1.9"
+            />
+
+            {/* Lead aVF Line (Marked ST Elevation) */}
+            <text x="8" y="114" fill="#881337" fontSize="11" fontWeight="bold">
+              aVF
+            </text>
+            <path
+              d="M 40 113 Q 53 113 60 109 Q 65 113 73 113 L 77 119 L 81 94 L 85 122 L 89 113 L 99 106 Q 115 104 133 113 L 170 113 M 180 113 Q 193 113 200 109 Q 205 113 213 113 L 217 119 L 221 94 L 225 122 L 229 113 L 239 106 Q 255 104 273 113 L 310 113 M 320 113 Q 333 113 340 109 Q 345 113 353 113 L 357 119 L 361 94 L 365 122 L 369 113 L 379 106 Q 395 104 413 113 L 450 113 M 460 113 Q 473 113 480 109 Q 485 113 493 113 L 497 119 L 501 94 L 505 122 L 509 113 L 519 106 Q 535 104 553 113 L 590 113"
+              fill="none"
+              stroke="#9f1239"
+              strokeWidth="1.9"
+            />
+          </svg>
+        )}
       </div>
-      <svg
-        viewBox="0 0 600 130"
-        className="h-auto w-full select-none"
-        preserveAspectRatio="none"
-      >
-        <defs>
-          <pattern
-            id="ecg-small-grid"
-            width="6"
-            height="6"
-            patternUnits="userSpaceOnUse"
-          >
-            <path
-              d="M 6 0 L 0 0 0 6"
-              fill="none"
-              stroke="#fca5a5"
-              strokeWidth="0.4"
-              strokeOpacity="0.6"
-            />
-          </pattern>
-          <pattern
-            id="ecg-big-grid"
-            width="30"
-            height="30"
-            patternUnits="userSpaceOnUse"
-          >
-            <rect width="30" height="30" fill="url(#ecg-small-grid)" />
-            <path
-              d="M 30 0 L 0 0 0 30"
-              fill="none"
-              stroke="#f87171"
-              strokeWidth="0.9"
-              strokeOpacity="0.75"
-            />
-          </pattern>
-        </defs>
-
-        {/* Pink Grid Background */}
-        <rect width="600" height="130" fill="url(#ecg-big-grid)" />
-
-        {/* Lead I Line */}
-        <text x="10" y="24" fill="#991b1b" fontSize="11" fontWeight="bold">
-          I
-        </text>
-        <path
-          d="M 25 24 Q 40 24 50 20 Q 55 24 65 24 L 70 29 L 75 8 L 80 32 L 85 24 L 115 24 Q 130 18 145 24 L 195 24"
-          fill="none"
-          stroke="#450a0a"
-          strokeWidth="1.6"
-        />
-
-        {/* Lead II Line (Prominent ST Elevation) */}
-        <text x="10" y="66" fill="#991b1b" fontSize="11" fontWeight="bold">
-          II
-        </text>
-        <path
-          d="M 25 66 Q 40 66 50 61 Q 55 66 65 66 L 70 73 L 75 42 L 80 77 L 85 62 L 95 56 Q 115 54 135 66 L 195 66"
-          fill="none"
-          stroke="#991b1b"
-          strokeWidth="1.9"
-        />
-
-        {/* Lead III Line (ST Elevation) */}
-        <text x="10" y="108" fill="#991b1b" fontSize="11" fontWeight="bold">
-          III / aVF
-        </text>
-        <path
-          d="M 60 108 Q 75 108 85 103 Q 90 108 100 108 L 105 116 L 110 82 L 115 118 L 120 104 L 130 96 Q 150 94 170 108 L 230 108"
-          fill="none"
-          stroke="#991b1b"
-          strokeWidth="1.9"
-        />
-
-        {/* Continued Leads Representation across strip */}
-        <path
-          d="M 210 24 Q 225 24 235 20 Q 240 24 250 24 L 255 29 L 260 8 L 265 32 L 270 24 L 300 24 Q 315 18 330 24 L 380 24 M 210 66 Q 225 66 235 61 Q 240 66 250 66 L 255 73 L 260 42 L 265 77 L 270 62 L 280 56 Q 300 54 320 66 L 380 66 M 245 108 Q 260 108 270 103 Q 275 108 285 108 L 290 116 L 295 82 L 300 118 L 305 104 L 315 96 Q 335 94 355 108 L 415 108 M 395 24 Q 410 24 420 20 Q 425 24 435 24 L 440 29 L 445 8 L 450 32 L 455 24 L 485 24 Q 500 18 515 24 L 590 24 M 395 66 Q 410 66 420 61 Q 425 66 435 66 L 440 73 L 445 42 L 450 77 L 455 62 L 465 56 Q 485 54 505 66 L 590 66 M 430 108 Q 445 108 455 103 Q 460 108 470 108 L 475 116 L 480 82 L 485 118 L 490 104 L 500 96 Q 520 94 540 108 L 590 108"
-          fill="none"
-          stroke="#450a0a"
-          strokeWidth="1.6"
-        />
-      </svg>
     </div>
   );
 }
+
 
 export default function BattleRoom() {
   const { user } = useAuth();

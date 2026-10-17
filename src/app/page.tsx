@@ -343,17 +343,17 @@ export default function Home() {
             </a>
           </div>
 
-          {/* Battle room illustration replaced with battle-live-arena.png */}
-          <div className="overflow-hidden rounded-3xl border border-burgundy-200/40 bg-slate-950 p-2 shadow-2xl">
-            <div className="overflow-hidden rounded-2xl border border-slate-800">
+          {/* Battle room crystal-clear screenshot (1024x765 HD) */}
+          <div className="overflow-hidden rounded-3xl border border-burgundy-200/40 bg-slate-950 p-2 shadow-2xl transition-all duration-300 hover:shadow-cyan-500/10">
+            <div className="overflow-hidden rounded-2xl border border-slate-800 shadow-inner">
               <Image
-                src="/battle-live-arena.png"
+                src="/battle-live-arena.jpg"
                 alt="Medscope Battle Room — Live Arena Interface"
-                width={1200}
-                height={750}
+                width={1024}
+                height={765}
                 unoptimized
                 priority
-                className="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+                className="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.01]"
               />
             </div>
             <div className="p-3 text-center">
