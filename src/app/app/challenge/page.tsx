@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { DEPARTMENTS, EXAMS, QUESTIONS, Question } from "@/lib/questions";
@@ -179,6 +180,19 @@ export default function ChallengeRoom() {
           Invite one other doctor. You take turns answering the same
           MCQs — 2 points per correct answer, −0.5 per wrong one.
         </p>
+
+        <div className="mt-5 overflow-hidden rounded-2xl border border-burgundy-200/60 shadow-md">
+          <Image
+            src="/challenge-room.jpg"
+            alt="Challenge Room — Two doctors facing off"
+            width={1024}
+            height={655}
+            unoptimized
+            priority
+            className="h-auto w-full object-cover"
+          />
+        </div>
+
         <form
           onSubmit={createChallenge}
           className="mt-6 space-y-4 rounded-2xl border border-burgundy-100 bg-cream-50 p-6"
@@ -367,96 +381,180 @@ export default function ChallengeRoom() {
     );
   }
 
-  /* ---------- game ---------- */
+  /* ---------- game (Arena TV interface from Image 1) ---------- */
   if (phase === "game" && currentRoom && question) {
     const pct = (timeLeft / currentRoom.secondsPerQuestion) * 100;
-    return (
-      <div className="mx-auto max-w-2xl">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-burgundy-950">
-            {currentRoom.title}
-          </h1>
-          <p className="rounded-full bg-burgundy-600 px-4 py-1.5 font-mono font-bold text-cream-50">
-            {timeLeft}s
-          </p>
-        </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-burgundy-100">
-          <div
-            className={`h-full rounded-full ${timeLeft < 10 ? "bg-red-500" : "bg-burgundy-500"}`}
-            style={{ width: `${pct}%` }}
-          />
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 text-center">
-          {currentRoom.players.map((p, i) => (
-            <div
-              key={p.name}
-              className={`rounded-xl border p-3 ${
-                qIndex % 2 === i
-                  ? "border-burgundy-500 bg-burgundy-50"
-                  : "border-burgundy-100 bg-cream-50"
-              }`}
-            >
-              <p className="text-xs font-semibold uppercase tracking-wider text-burgundy-600">
-                Player {i + 1}
-              </p>
-              <p className="text-sm font-semibold text-burgundy-950">
-                {p.name}
-                {qIndex % 2 === i && " — your turn"}
-              </p>
-              <p className="text-2xl font-bold text-burgundy-600">{p.score}</p>
-              <p className="text-xs text-burgundy-800/60">
-                {p.correct}/{p.answered} correct
-              </p>
-            </div>
-          ))}
-        </div>
+    const player1 = currentRoom.players[0] || { name: "Player 1", score: 0 };
+    const player2 = currentRoom.players[1] || { name: "Player 2", score: 0 };
 
-        <section className="mt-4 rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
-          <p className="text-xs font-semibold text-burgundy-600">
-            Question {qIndex + 1} of {currentRoom.questionCount} ·{" "}
-            {question.topic}
-          </p>
-          <p className="mt-3 text-lg text-burgundy-950">{question.text}</p>
-          <div className="mt-4 space-y-2">
+    return (
+      <div className="mx-auto max-w-4xl py-2">
+        {/* TV Outer Monitor Frame */}
+        <div className="relative overflow-hidden rounded-3xl border-4 border-slate-700/80 bg-gradient-to-b from-[#0a192f] via-[#081b33] to-[#040d1a] p-5 shadow-2xl md:p-8">
+          
+          {/* Top Scoreboard Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-900/50 pb-5">
+            {/* Player 1 Score Box */}
+            <div className="rounded-xl border border-sky-400/30 bg-white/95 px-4 py-2 text-center shadow-md">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {player1.name}
+              </span>
+              <span className="text-xl font-extrabold text-sky-600 sm:text-2xl">
+                {player1.score}
+              </span>
+            </div>
+
+            {/* Center Scoreboard Pill */}
+            <div className="flex flex-1 items-center justify-center gap-3 rounded-2xl border border-sky-500/20 bg-slate-800/90 px-4 py-2.5 shadow-inner">
+              <div className="text-center">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-sky-300">
+                  Round
+                </span>
+                <div className="flex gap-1 justify-center mt-0.5">
+                  {[1, 2, 3].map((r) => (
+                    <span
+                      key={r}
+                      className={`h-2 w-2 rounded-full ${
+                        r <= Math.min(Math.floor(qIndex / 3) + 1, 3)
+                          ? "bg-cyan-400 shadow-[0_0_8px_#22d3ee]"
+                          : "bg-slate-600"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="text-center">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-sky-300">
+                  Question
+                </span>
+                <div className="flex gap-1 justify-center mt-0.5">
+                  {[1, 2, 3].map((q) => (
+                    <span
+                      key={q}
+                      className={`h-2 w-2 rounded-full ${
+                        q <= (qIndex % 3) + 1
+                          ? "bg-cyan-400 shadow-[0_0_8px_#22d3ee]"
+                          : "bg-slate-600"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Cyan Progress Bar */}
+              <div className="hidden h-3 w-32 overflow-hidden rounded-full bg-slate-700 sm:block">
+                <div
+                  className="h-full bg-gradient-to-r from-cyan-400 to-sky-300 transition-all duration-300 shadow-[0_0_12px_#38bdf8]"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+
+              {/* Digital Timer */}
+              <div className="rounded-lg bg-slate-900/80 px-3 py-1 font-mono text-xl font-bold tracking-widest text-cyan-300 sm:text-2xl">
+                {timeLeft < 10 ? `0${timeLeft}` : timeLeft}s
+              </div>
+            </div>
+
+            {/* Player 2 Score Box */}
+            <div className="rounded-xl border border-sky-400/30 bg-white/95 px-4 py-2 text-center shadow-md">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {player2.name}
+              </span>
+              <span className="text-xl font-extrabold text-sky-600 sm:text-2xl">
+                {player2.score}
+              </span>
+            </div>
+          </div>
+
+          {/* Medscope Brand Badge */}
+          <div className="my-4 flex items-center justify-center gap-2">
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-400 text-xs font-bold text-slate-950">
+              ✚
+            </span>
+            <span className="text-xs font-bold tracking-wider text-cyan-300 uppercase">
+              Medscope Challenge Room
+            </span>
+          </div>
+
+          {/* Center Question Screen */}
+          <div className="my-6 text-center">
+            <p className="text-lg font-bold text-white sm:text-2xl md:text-3xl leading-snug">
+              {question.text}
+            </p>
+            <p className="mt-2 text-xs text-sky-400/80">
+              Exam Recall: {currentRoom.topic} · {currentRoom.faculty || "Clinical Knowledge"}
+            </p>
+          </div>
+
+          {/* 2x2 Grid Answer Cards */}
+          <div className="grid gap-4 sm:grid-cols-2">
             {question.options.map((opt, i) => {
-              const isCorrect = opt === question.correct;
+              const letter = String.fromCharCode(65 + i);
               const isPicked = selected === opt;
-              let style = "border-burgundy-100 hover:bg-burgundy-50";
-              if (revealed && isCorrect)
-                style = "border-burgundy-500 bg-burgundy-50 font-semibold text-burgundy-800";
-              else if (revealed && isPicked)
-                style = "border-red-300 bg-red-50";
-              else if (isPicked) style = "border-burgundy-500 bg-burgundy-50";
+              const isCorrect = opt === question.correct;
+
+              let cardStyle =
+                "border-sky-700/60 bg-slate-900/80 text-white hover:border-cyan-400 hover:bg-slate-800/90";
+              let badgeStyle = "bg-sky-600 text-white";
+
+              if (revealed && isCorrect) {
+                cardStyle =
+                  "border-emerald-400 bg-emerald-950/80 text-emerald-100 ring-2 ring-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]";
+                badgeStyle = "bg-emerald-500 text-slate-950 font-bold";
+              } else if (revealed && isPicked && !isCorrect) {
+                cardStyle =
+                  "border-rose-500 bg-rose-950/80 text-rose-100 ring-2 ring-rose-500";
+                badgeStyle = "bg-rose-500 text-white";
+              } else if (isPicked) {
+                cardStyle =
+                  "border-cyan-400 bg-cyan-400 text-slate-950 font-bold ring-2 ring-cyan-300 shadow-[0_0_25px_rgba(34,211,238,0.6)]";
+                badgeStyle = "bg-white text-slate-950 font-bold";
+              }
+
               return (
                 <button
                   key={opt}
-                  onClick={() => answer(opt)}
+                  type="button"
                   disabled={revealed}
-                  className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left ${style}`}
+                  onClick={() => answer(opt)}
+                  className={`flex items-center gap-4 rounded-xl border-2 p-4 text-left transition-all duration-200 ${cardStyle}`}
                 >
-                  <span className="font-bold text-burgundy-400">
-                    {String.fromCharCode(65 + i)}
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-base font-bold shadow-sm ${badgeStyle}`}
+                  >
+                    {letter}
+                  </div>
+                  <span className="text-sm font-medium leading-normal sm:text-base">
+                    {opt}
                   </span>
-                  <span className="text-burgundy-950">{opt}</span>
                 </button>
               );
             })}
           </div>
+
+          {/* Revealed Feedback */}
           {revealed && (
-            <div className="mt-4 rounded-xl bg-burgundy-50 p-4">
-              <p className="text-sm font-semibold text-burgundy-800">
+            <div className="mt-6 rounded-2xl border border-sky-400/40 bg-slate-900/90 p-4 text-center">
+              <p className="text-base font-bold text-cyan-300">
                 {selected === question.correct
-                  ? "Correct — +2 points"
+                  ? "✓ Correct — +2 points awarded!"
                   : timeLeft <= 0
-                    ? "Time up"
-                    : `Wrong — −0.5. The answer is ${question.correct}.`}
+                    ? "⏱ Time Up"
+                    : `✗ Incorrect (−0.5). Correct answer: ${question.correct}`}
               </p>
-              <p className="mt-1 text-sm text-burgundy-900/80">
+              <p className="mt-1 text-xs text-slate-300 max-w-xl mx-auto">
                 {question.explanation}
               </p>
             </div>
           )}
-        </section>
+
+          {/* Bottom Monitor Stand Feet */}
+          <div className="mt-6 flex justify-center gap-12">
+            <div className="h-4 w-24 rounded-t-lg bg-slate-800 border-t border-slate-600" />
+            <div className="h-4 w-24 rounded-t-lg bg-slate-800 border-t border-slate-600" />
+          </div>
+        </div>
       </div>
     );
   }

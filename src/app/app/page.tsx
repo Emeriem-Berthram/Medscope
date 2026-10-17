@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { accuracy, getAttempts, getMocks, weakAreas } from "@/lib/store";
 import { DEPARTMENTS, EXAMS } from "@/lib/questions";
 import { listBattleRooms, fetchPublicBattles, Room } from "@/lib/rooms";
 import SubscribeModal from "@/components/subscribe-modal";
+import AutomatedOnboarding from "@/components/automated-onboarding";
 import { PLANS } from "@/lib/paystack";
 
 export default function Dashboard() {
@@ -37,58 +39,9 @@ export default function Dashboard() {
       </p>
 
       {onboarding ? (
-        <section className="mt-8 rounded-2xl border border-burgundy-100 bg-cream-50 p-8">
-          <h2 className="text-xl font-bold text-burgundy-950">
-            Which exam are you sitting?
-          </h2>
-          <form onSubmit={finishOnboarding} className="mt-6 space-y-6">
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium text-burgundy-900">Exam</legend>
-              <div className="flex flex-wrap gap-2">
-                {EXAMS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setProfile({ exam: c })}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                      user.exam === c
-                        ? "bg-burgundy-500 text-white"
-                        : "border border-burgundy-200 text-burgundy-700 hover:bg-burgundy-50"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium text-burgundy-900">Department</legend>
-              <div className="flex flex-wrap gap-2">
-                {DEPARTMENTS.map((f) => (
-                  <button
-                    key={f}
-                    type="button"
-                    onClick={() => setProfile({ faculty: f })}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                      user.faculty === f
-                        ? "bg-burgundy-500 text-white"
-                        : "border border-burgundy-200 text-burgundy-700 hover:bg-burgundy-50"
-                    }`}
-                  >
-                    {f}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
-            <button
-              type="submit"
-              disabled={!user.exam || !user.faculty}
-              className="rounded-full bg-burgundy-500 px-6 py-3 font-semibold text-white hover:bg-burgundy-600 disabled:opacity-50"
-            >
-              Start practising
-            </button>
-          </form>
-        </section>
+        <div className="mt-8">
+          <AutomatedOnboarding onComplete={() => setOnboarding(false)} />
+        </div>
       ) : (
         <>
           <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
@@ -174,6 +127,50 @@ export default function Dashboard() {
         <p className="mt-3 break-all text-xs text-burgundy-800/60">
           https://medscope-app.vercel.app/signup?ref={user.inviteCode}
         </p>
+      </section>
+
+      {/* Challenge Section with Reference Picture */}
+      <section className="mt-8 overflow-hidden rounded-3xl border border-burgundy-200/90 bg-gradient-to-br from-burgundy-950 via-burgundy-900 to-burgundy-950 p-6 text-cream-50 shadow-xl sm:p-8">
+        <div className="grid items-center gap-6 md:grid-cols-2">
+          <div>
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-burgundy-200">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              Live 1v1 Face-Off
+            </span>
+            <h2 className="mt-3 text-2xl font-bold text-white sm:text-3xl">
+              Challenge Room
+            </h2>
+            <p className="mt-2 text-sm text-burgundy-200/80">
+              Go head-to-head with another doctor in real time. Take turns answering the same past exam recalls — 2 points per correct answer, race the timer, and dominate the leaderboard.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <Link
+                href="/app/challenge"
+                className="rounded-full bg-cream-50 px-6 py-2.5 text-sm font-bold text-burgundy-950 shadow-md transition-all hover:bg-cream-100 hover:shadow-lg"
+              >
+                Enter Challenge Room →
+              </Link>
+              <Link
+                href="/app/battle"
+                className="rounded-full border border-burgundy-400/40 px-5 py-2.5 text-sm font-semibold text-cream-50 transition-colors hover:bg-burgundy-800"
+              >
+                Battle Room (20 Doctors)
+              </Link>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-burgundy-400/30 shadow-2xl transition-transform duration-300 hover:scale-[1.01]">
+            <Image
+              src="/challenge-room.jpg"
+              alt="Challenge Room — Two doctors facing off"
+              width={1024}
+              height={655}
+              unoptimized
+              priority
+              className="h-auto w-full object-cover"
+            />
+          </div>
+        </div>
       </section>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
