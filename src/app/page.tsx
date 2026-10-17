@@ -1,3 +1,4 @@
+import Image from "next/image";
 import PricingButton from "@/components/pricing-button";
 
 const features = [
@@ -219,80 +220,19 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Face-off illustration */}
-          <div className="rounded-3xl border border-burgundy-100 bg-gradient-to-b from-burgundy-50 to-cream-50 p-10">
-            <svg
-              viewBox="0 0 360 300"
-              className="mx-auto w-full"
-              role="img"
-              aria-label="Two doctors facing off"
-            >
-              <defs>
-                <radialGradient id="burst" cx="50%" cy="50%" r="50%">
-                  <stop offset="0%" stopColor="#800020" stopOpacity="0.18" />
-                  <stop offset="100%" stopColor="#800020" stopOpacity="0" />
-                </radialGradient>
-              </defs>
-              <circle cx="180" cy="150" r="130" fill="url(#burst)" />
-              <line x1="30" y1="270" x2="330" y2="270" stroke="#e3d4b8" strokeWidth="4" strokeLinecap="round" />
-
-              {/* LEFT FIGURE — burgundy scrubs, combat stance */}
-              <g>
-                {/* back leg */}
-                <path d="M118 270 L112 205 L100 270 Z" fill="#450011" />
-                {/* front leg */}
-                <path d="M132 270 L138 205 L152 270 Z" fill="#570016" />
-                {/* torso — scrubs */}
-                <path d="M108 205 L116 128 Q138 116 160 128 L168 205 Z" fill="#800020" />
-                {/* head */}
-                <circle cx="138" cy="100" r="24" fill="#c68863" />
-                {/* hair */}
-                <path d="M114 96 Q116 72 138 72 Q160 72 162 96 Q150 84 138 84 Q126 84 114 96 Z" fill="#2e000b" />
-                {/* face */}
-                <circle cx="131" cy="99" r="2.4" fill="#2e000b" />
-                <circle cx="145" cy="99" r="2.4" fill="#2e000b" />
-                <path d="M132 108 Q138 112 144 108" stroke="#2e000b" strokeWidth="2" fill="none" strokeLinecap="round" />
-                {/* stethoscope */}
-                <path d="M126 130 Q138 148 150 130" stroke="#2e000b" strokeWidth="2.5" fill="none" />
-                <circle cx="138" cy="152" r="4" fill="#2e000b" />
-                {/* guard arms */}
-                <path d="M116 136 L92 118" stroke="#800020" strokeWidth="11" strokeLinecap="round" />
-                <circle cx="88" cy="115" r="7" fill="#c68863" />
-                <path d="M160 136 L172 112" stroke="#800020" strokeWidth="11" strokeLinecap="round" />
-                <circle cx="174" cy="108" r="7" fill="#c68863" />
-              </g>
-
-              {/* RIGHT FIGURE — lighter scrubs, combat stance */}
-              <g>
-                <path d="M242 270 L248 205 L260 270 Z" fill="#d19da8" />
-                <path d="M228 270 L222 205 L208 270 Z" fill="#bc6b7c" />
-                <path d="M252 205 L244 128 Q222 116 200 128 L192 205 Z" fill="#bc6b7c" />
-                <circle cx="222" cy="100" r="24" fill="#8d5a3b" />
-                <path d="M198 94 Q200 68 222 68 Q244 68 246 94 Q236 80 222 82 Q208 80 198 94 Z" fill="#2e000b" />
-                <circle cx="215" cy="99" r="2.4" fill="#2e000b" />
-                <circle cx="229" cy="99" r="2.4" fill="#2e000b" />
-                <path d="M216 108 Q222 112 228 108" stroke="#2e000b" strokeWidth="2" fill="none" strokeLinecap="round" />
-                <path d="M234 130 Q222 148 210 130" stroke="#2e000b" strokeWidth="2.5" fill="none" />
-                <circle cx="222" cy="152" r="4" fill="#2e000b" />
-                <path d="M244 136 L268 118" stroke="#bc6b7c" strokeWidth="11" strokeLinecap="round" />
-                <circle cx="272" cy="115" r="7" fill="#8d5a3b" />
-                <path d="M200 136 L188 112" stroke="#bc6b7c" strokeWidth="11" strokeLinecap="round" />
-                <circle cx="186" cy="108" r="7" fill="#8d5a3b" />
-              </g>
-
-              {/* VS burst */}
-              <circle cx="180" cy="105" r="34" fill="#fdfbf7" stroke="#800020" strokeWidth="4" />
-              <text x="180" y="117" textAnchor="middle" fontFamily="Arial, sans-serif" fontWeight="bold" fontSize="28" fill="#800020">VS</text>
-
-              {/* energy sparks */}
-              <g stroke="#a34457" strokeWidth="4" strokeLinecap="round">
-                <line x1="168" y1="52" x2="158" y2="30" />
-                <line x1="192" y1="52" x2="202" y2="30" />
-                <line x1="180" y1="48" x2="180" y2="24" />
-                <line x1="150" y1="66" x2="132" y2="52" />
-                <line x1="210" y1="66" x2="228" y2="52" />
-              </g>
-            </svg>
+          {/* Challenge room illustration */}
+          <div className="overflow-hidden rounded-3xl border border-burgundy-100 bg-gradient-to-b from-burgundy-50 to-cream-50 p-4 shadow-sm sm:p-6">
+            <div className="overflow-hidden rounded-2xl border border-burgundy-200/60 shadow-md transition-all duration-300 hover:shadow-xl">
+              <Image
+                src="/challenge-room.jpg"
+                alt="Challenge Room — two doctors facing off"
+                width={1024}
+                height={655}
+                unoptimized
+                priority
+                className="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
+              />
+            </div>
             <p className="mt-4 text-center text-sm font-semibold text-burgundy-700">
               Challenge room — two doctors, one question bank
             </p>
