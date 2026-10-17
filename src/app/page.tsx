@@ -184,58 +184,57 @@ export default function Home() {
       </section>
 
       {/* Study modes — face-off visual */}
-      <section className="mx-auto max-w-6xl px-4 py-16">
-        <div className="grid items-center gap-10 md:grid-cols-2">
+      <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
+        <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
           <div>
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-3xl font-extrabold tracking-tight text-burgundy-950 sm:text-4xl">
               One bank, every way to study
             </h2>
-            <p className="mt-3 max-w-xl text-burgundy-800/80">
+            <p className="mt-3 text-base text-burgundy-800/80 leading-relaxed">
               Medscope supports individual reading, group reading, and
               competitions — the same recall questions power all three.
             </p>
+
             <div className="mt-8 space-y-4">
-              {[
-                [
-                  "Individual reading",
-                  "Work through recalls at your own pace with explanations for every question.",
-                ],
-                [
-                  "Group reading",
-                  "Create a challenge room, share the code, and take turns answering with a colleague.",
-                ],
-                [
-                  "Competitions",
-                  "Battle rooms for up to 20 doctors — fastest correct answer takes the points.",
-                ],
-              ].map(([t, b]) => (
-                <div
-                  key={t}
-                  className="rounded-2xl border border-burgundy-100 bg-cream-50 p-5"
-                >
-                  <h3 className="font-bold text-burgundy-950">{t}</h3>
-                  <p className="mt-1 text-sm text-burgundy-800/70">{b}</p>
-                </div>
-              ))}
+              <div className="rounded-2xl border border-burgundy-100 bg-cream-50 p-5 shadow-xs transition hover:border-burgundy-200">
+                <h3 className="font-bold text-burgundy-950">Individual reading</h3>
+                <p className="mt-1 text-sm text-burgundy-800/70">
+                  Work through recalls at your own pace with explanations for every question.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-burgundy-100 bg-cream-50 p-5 shadow-xs transition hover:border-burgundy-200">
+                <h3 className="font-bold text-burgundy-950">Group reading</h3>
+                <p className="mt-1 text-sm text-burgundy-800/70">
+                  Create a challenge room, share the code, and take turns answering with a colleague.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-burgundy-100 bg-cream-50 p-5 shadow-xs transition hover:border-burgundy-200">
+                <h3 className="font-bold text-burgundy-950">Competitions</h3>
+                <p className="mt-1 text-sm text-burgundy-800/70">
+                  Battle rooms for up to 20 doctors — fastest correct answer takes the points.
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Challenge room illustration */}
-          <div className="overflow-hidden rounded-3xl border border-burgundy-100 bg-gradient-to-b from-burgundy-50 to-cream-50 p-4 shadow-sm sm:p-6">
-            <div className="overflow-hidden rounded-2xl border border-burgundy-200/60 shadow-md transition-all duration-300 hover:shadow-xl">
-              <Image
-                src="/challenge-room.jpg"
-                alt="Challenge Room — two doctors facing off"
-                width={1024}
-                height={655}
-                unoptimized
-                priority
-                className="h-auto w-full object-cover transition-transform duration-500 hover:scale-[1.02]"
-              />
+          {/* Challenge room picture on the exact same line */}
+          <div className="overflow-hidden rounded-2xl border border-burgundy-200/80 bg-white shadow-md">
+            <Image
+              src="/challenge-room.jpg"
+              alt="Challenge Room — two doctors facing off"
+              width={1024}
+              height={655}
+              unoptimized
+              priority
+              className="h-auto w-full object-cover"
+            />
+            <div className="border-t border-burgundy-100 bg-cream-50/70 p-4 text-center">
+              <p className="text-sm font-semibold text-burgundy-800">
+                Challenge room — two doctors, one question bank
+              </p>
             </div>
-            <p className="mt-4 text-center text-sm font-semibold text-burgundy-700">
-              Challenge room — two doctors, one question bank
-            </p>
           </div>
         </div>
       </section>
