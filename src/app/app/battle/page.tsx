@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useAuth } from "@/lib/auth";
-import { DEPARTMENTS, EXAMS, QUESTIONS, Question } from "@/lib/questions";
+import { DEPARTMENTS, EXAMS, Question, getQuestionsForTopic } from "@/lib/questions";
 import {
   createRoom,
   fetchRoom,
@@ -20,40 +20,6 @@ import BattleChat from "@/components/battle-chat";
 
 type Phase = "lobby" | "waiting" | "game" | "results";
 type Tab = "browse" | "my-battles" | "created-battles";
-
-interface Bot {
-  name: string;
-  delay: number;
-  accuracy: number;
-}
-
-const DEFAULT_ARENA_PLAYERS = [
-  { name: "Dr. Ade", score: 74, role: "Host" },
-  { name: "MedKing", score: 68, role: "Player" },
-  { name: "Chinedu", score: 62, role: "Player" },
-  { name: "Kemi T", score: 54, role: "Player" },
-  { name: "Ibrahim", score: 48, role: "Player" },
-  { name: "Habibat", score: 42, role: "Player" },
-  { name: "Fikayo", score: 38, role: "Player" },
-  { name: "Kimberly", score: 31, role: "Player" },
-  { name: "Dr. Sarah K.", score: 28, role: "Player" },
-  { name: "Dr. Michael R.", score: 24, role: "Player" },
-  { name: "Dr. Fatima A.", score: 20, role: "Player" },
-  { name: "Dr. Emeka E.", score: 18, role: "Player" },
-];
-
-const BOT_NAMES = [
-  "Dr. Ade",
-  "MedKing",
-  "Chinedu",
-  "Kemi T",
-  "Ibrahim",
-  "Habibat",
-  "Fikayo",
-  "Kimberly",
-  "Dr. Sarah K.",
-  "Dr. Michael R.",
-];
 
 // Seed public battles for the lobby
 const SEED_BATTLES: {
@@ -82,14 +48,52 @@ const SEED_BATTLES: {
     topic: "Cardiology",
     faculty: "Internal Medicine",
     iconBg: "bg-rose-100",
-    iconColor: "text-rose-600",
+    iconColor: "text-rose-700",
     badgeBg: "bg-rose-50 border border-rose-200",
-    badgeText: "text-rose-700",
+    badgeText: "text-rose-800",
     iconType: "heart",
-    playersCount: 12,
+    playersCount: 6,
     maxPlayers: 20,
     duration: "20 mins",
     hostName: "Dr. Sarah K.",
+    status: "live",
+    questionCount: 20,
+    secondsPerQuestion: 40,
+  },
+  {
+    code: "PHYS01",
+    title: "Physiology High-Yield Battle",
+    subtitle: "Resting membrane potentials, Frank-Starling law, GFR clearance & surfactant mechanics",
+    topic: "Physiology",
+    faculty: "Basic Medical Sciences",
+    iconBg: "bg-amber-100",
+    iconColor: "text-amber-800",
+    badgeBg: "bg-amber-50 border border-amber-200",
+    badgeText: "text-amber-800",
+    iconType: "pill",
+    playersCount: 4,
+    maxPlayers: 20,
+    duration: "20 mins",
+    hostName: "Dr. Kalu N.",
+    status: "live",
+    questionCount: 20,
+    secondsPerQuestion: 40,
+  },
+  {
+    code: "RAD02",
+    title: "Radiography & Imaging Challenge",
+    subtitle: "CXR silhouette signs, CT acute hemorrhage attenuation, MRI sequences & contrast pearls",
+    topic: "Radiography",
+    faculty: "Radiology",
+    iconBg: "bg-burgundy-100",
+    iconColor: "text-burgundy-700",
+    badgeBg: "bg-burgundy-50 border border-burgundy-200",
+    badgeText: "text-burgundy-800",
+    iconType: "microscope",
+    playersCount: 5,
+    maxPlayers: 20,
+    duration: "25 mins",
+    hostName: "Dr. Bamidele T.",
     status: "live",
     questionCount: 20,
     secondsPerQuestion: 40,
@@ -100,10 +104,10 @@ const SEED_BATTLES: {
     subtitle: "Drug mechanisms & pharmacokinetics · Autonomic drugs, antimicrobials & toxicology",
     topic: "Pharmacology",
     faculty: "Basic Medical Sciences",
-    iconBg: "bg-blue-100",
-    iconColor: "text-blue-600",
-    badgeBg: "bg-blue-50 border border-blue-200",
-    badgeText: "text-blue-700",
+    iconBg: "bg-burgundy-100",
+    iconColor: "text-burgundy-800",
+    badgeBg: "bg-burgundy-50 border border-burgundy-200",
+    badgeText: "text-burgundy-800",
     iconType: "pill",
     playersCount: 8,
     maxPlayers: 20,
@@ -120,11 +124,11 @@ const SEED_BATTLES: {
     topic: "Surgery",
     faculty: "Surgery",
     iconBg: "bg-emerald-100",
-    iconColor: "text-emerald-600",
+    iconColor: "text-emerald-700",
     badgeBg: "bg-emerald-50 border border-emerald-200",
-    badgeText: "text-emerald-700",
+    badgeText: "text-emerald-800",
     iconType: "surgery",
-    playersCount: 15,
+    playersCount: 7,
     maxPlayers: 20,
     duration: "25 mins",
     hostName: "Dr. Fatima A.",
@@ -139,9 +143,9 @@ const SEED_BATTLES: {
     topic: "Paediatrics",
     faculty: "Paediatrics",
     iconBg: "bg-purple-100",
-    iconColor: "text-purple-600",
+    iconColor: "text-purple-700",
     badgeBg: "bg-purple-50 border border-purple-200",
-    badgeText: "text-purple-700",
+    badgeText: "text-purple-800",
     iconType: "baby",
     playersCount: 4,
     maxPlayers: 20,
@@ -151,41 +155,23 @@ const SEED_BATTLES: {
     questionCount: 20,
     secondsPerQuestion: 40,
   },
-  {
-    code: "PATH05",
-    title: "Pathology Marathon",
-    subtitle: "Histology, neoplasms & biopsy cases · Cell injury and systemic pathology",
-    topic: "Pathology",
-    faculty: "Pathology",
-    iconBg: "bg-teal-100",
-    iconColor: "text-teal-600",
-    badgeBg: "bg-teal-50 border border-teal-200",
-    badgeText: "text-teal-700",
-    iconType: "microscope",
-    playersCount: 18,
-    maxPlayers: 20,
-    duration: "40 mins",
-    hostName: "Dr. Amara O.",
-    status: "live",
-    questionCount: 30,
-    secondsPerQuestion: 40,
-  },
 ];
 
 const TOPIC_CHIPS = [
   "All Topics",
+  "Physiology",
+  "Radiography",
+  "Cardiology",
+  "Pharmacology",
   "Anatomy",
   "Surgery",
   "Paediatrics",
-  "OBGYN",
-  "Radiology",
   "Pathology",
-  "Pharmacology",
-  "Cardiology",
+  "Obstetrics & Gynaecology",
   "Internal Medicine",
 ];
 
-// Clinical ECG strip component matching Image 3 (Leads II, III, aVF)
+// Clinical ECG strip component for Cardiology questions
 function ClinicalEcgStrip() {
   const [showHdVisual, setShowHdVisual] = useState(false);
 
@@ -195,7 +181,7 @@ function ClinicalEcgStrip() {
         <div className="flex items-center justify-between text-[10px] font-bold text-rose-800/90 mb-1.5">
           <span className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-rose-600 animate-pulse" />
-            12-Lead Diagnostic ECG · Leads II, III & aVF (ST Elevation)
+            Diagnostic ECG Reference · Leads II, III & aVF (Inferior ST Elevation)
           </span>
           <button
             type="button"
@@ -208,7 +194,7 @@ function ClinicalEcgStrip() {
         </div>
 
         {showHdVisual ? (
-          <div className="overflow-hidden rounded-lg border border-slate-700 bg-slate-950 p-1">
+          <div className="overflow-hidden rounded-lg border border-burgundy-900 bg-burgundy-950 p-1">
             <Image
               src="/battle-live-arena.jpg"
               alt="High Definition Battle Arena Clinical Diagnostic"
@@ -260,7 +246,7 @@ function ClinicalEcgStrip() {
             {/* Pink Grid Background */}
             <rect width="600" height="135" fill="url(#ecg-big-grid-hd)" />
 
-            {/* Lead II Line (Marked ST Elevation) */}
+            {/* Lead II Line */}
             <text x="8" y="26" fill="#881337" fontSize="12" fontWeight="bold">
               II
             </text>
@@ -271,7 +257,7 @@ function ClinicalEcgStrip() {
               strokeWidth="1.9"
             />
 
-            {/* Lead III Line (Marked ST Elevation) */}
+            {/* Lead III Line */}
             <text x="8" y="70" fill="#881337" fontSize="12" fontWeight="bold">
               III
             </text>
@@ -282,7 +268,7 @@ function ClinicalEcgStrip() {
               strokeWidth="1.9"
             />
 
-            {/* Lead aVF Line (Marked ST Elevation) */}
+            {/* Lead aVF Line */}
             <text x="8" y="114" fill="#881337" fontSize="11" fontWeight="bold">
               aVF
             </text>
@@ -299,7 +285,6 @@ function ClinicalEcgStrip() {
   );
 }
 
-
 export default function BattleRoom() {
   const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>("lobby");
@@ -312,10 +297,10 @@ export default function BattleRoom() {
 
   // Create Battle panel form state
   const [createTitle, setCreateTitle] = useState("");
-  const [createTopic, setCreateTopic] = useState("Cardiology");
+  const [createTopic, setCreateTopic] = useState("Physiology");
   const [createDescription, setCreateDescription] = useState("");
   const [createExam, setCreateExam] = useState("NPMCN");
-  const [createFaculty, setCreateFaculty] = useState("Internal Medicine");
+  const [createFaculty, setCreateFaculty] = useState("Basic Medical Sciences");
   const [createQuestionCount, setCreateQuestionCount] = useState(20);
   const [createSeconds, setCreateSeconds] = useState(40);
   const [createVisibility, setCreateVisibility] = useState<"public" | "private">("public");
@@ -323,7 +308,6 @@ export default function BattleRoom() {
   const [createScheduledFor, setCreateScheduledFor] = useState("");
   const [allowLiveChat, setAllowLiveChat] = useState(true);
   const [hostCanKick, setHostCanKick] = useState(true);
-  const [questionSource, setQuestionSource] = useState<"bank" | "custom">("bank");
   const [joinCodeInput, setJoinCodeInput] = useState("");
   const [copiedCode, setCopiedCode] = useState(false);
   const [error, setError] = useState("");
@@ -338,7 +322,7 @@ export default function BattleRoom() {
   const [submitted, setSubmitted] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [winner, setWinner] = useState("");
-  const botsRef = useRef<Bot[]>([]);
+  const [scheduledCountdown, setScheduledCountdown] = useState<string>("");
 
   if (!user) return null;
 
@@ -356,9 +340,9 @@ export default function BattleRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  const question = pool[qIndex];
+  const question = pool[qIndex] || pool[0];
 
-  // Countdown timer in game
+  // Countdown timer in live game
   useEffect(() => {
     if (phase !== "game" || revealed) return;
     if (timeLeft <= 0) {
@@ -370,60 +354,65 @@ export default function BattleRoom() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, timeLeft, revealed]);
 
-  // Simulated bot opponents answering in live game
+  // Scheduled battle countdown timer (displays message: "Battle starts in...")
   useEffect(() => {
-    if (phase !== "game" || revealed || !room) return;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    botsRef.current.forEach((bot, i) => {
-      if (room.players[i + 1] === undefined) return;
-      const t = setTimeout(
-        () => {
-          if (!question) return;
-          const correct = Math.random() < bot.accuracy;
-          botAnswer(room.players[i + 1].name, correct, true);
-        },
-        bot.delay * 1000
-      );
-      timers.push(t);
-    });
-    return () => timers.forEach(clearTimeout);
+    if (phase !== "waiting" || !room) return;
+
+    function updateScheduledTimer() {
+      if (!room?.scheduledFor) {
+        setScheduledCountdown("Waiting for host to start battle...");
+        return;
+      }
+      const targetTime = new Date(room.scheduledFor).getTime();
+      const now = Date.now();
+      const diff = targetTime - now;
+
+      if (diff <= 0) {
+        setScheduledCountdown("Starting battle now...");
+        startLiveBattleNow(room);
+        return;
+      }
+
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+      const parts = [];
+      if (hours > 0) parts.push(`${String(hours).padStart(2, "0")}h`);
+      parts.push(`${String(mins).padStart(2, "0")}m`);
+      parts.push(`${String(secs).padStart(2, "0")}s`);
+
+      setScheduledCountdown(parts.join(" : "));
+    }
+
+    updateScheduledTimer();
+    const interval = setInterval(updateScheduledTimer, 1000);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase, qIndex, revealed]);
+  }, [phase, room?.scheduledFor]);
 
   // Sync remote room state over Supabase Realtime
   useEffect(() => {
     if (!room || phase === "results" || phase === "lobby") return;
-    const unsub = subscribeRoom(room.code, (r) => setRoom(r));
+    const unsub = subscribeRoom(room.code, (r) => {
+      setRoom(r);
+      if (r.status === "live" && phase === "waiting") {
+        startLiveBattleNow(r);
+      }
+    });
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room?.code, phase]);
 
+  // Dynamic question pool builder matching the room topic
   function buildPool(r: Room) {
-    const base = QUESTIONS.map((q, i) => ({ ...q, id: i }));
-    // Put Cardiology questions at the front to match the ECG question
-    const sortedBase = [...base].sort((a, b) =>
-      a.topic === "Cardiology" ? -1 : b.topic === "Cardiology" ? 1 : 0
+    const rawQuestions = getQuestionsForTopic(
+      r.topic,
+      r.questionCount || 20,
+      r.exam,
+      r.faculty
     );
-    const filtered = sortedBase.filter(
-      (q) =>
-        (!r.faculty || q.faculty === r.faculty) &&
-        (!r.topic || q.topic === r.topic) &&
-        (!r.exam || q.exam === r.exam)
-    );
-    const result = filtered.length > 0 ? filtered : sortedBase;
-    return [...result].slice(0, r.questionCount);
-  }
-
-  function botAnswer(name: string, correct: boolean, isBot: boolean) {
-    if (!room || revealed) return;
-    const player = room.players.find((p) => p.name === name);
-    if (!player) return;
-    player.score = Math.round((player.score + (correct ? 2 : -0.5)) * 10) / 10;
-    player.answered += 1;
-    if (correct) player.correct += 1;
-    if (isBot && correct && !winner) setWinner(name);
-    saveRoom(room);
-    setRoom({ ...room });
+    return rawQuestions.map((q, i) => ({ ...q, id: i }));
   }
 
   function endQuestion(_: string | null) {
@@ -440,7 +429,7 @@ export default function BattleRoom() {
         setWinner("");
         setTimeLeft(room.secondsPerQuestion);
       }
-    }, 2800);
+    }, 1800);
   }
 
   function handleSelectOption(opt: string) {
@@ -448,11 +437,17 @@ export default function BattleRoom() {
     setSelected(opt);
   }
 
+  // Once a user clicks submit answer and the answer is correct,
+  // the next question immediately pops up and starts counting!
   function handleSubmitAnswer() {
     if (!room || revealed || !question || !selected || submitted) return;
     setSubmitted(true);
     const correct = selected === question.correct;
-    const me = room.players[0];
+
+    const me =
+      room.players.find((p) => p.name === (user?.name ?? "Doctor")) ||
+      room.players[0];
+
     if (me) {
       me.score = Math.round((me.score + (correct ? 2 : -0.5)) * 10) / 10;
       me.answered += 1;
@@ -463,7 +458,37 @@ export default function BattleRoom() {
     }
     saveRoom(room);
     setRoom({ ...room });
-    endQuestion(null);
+
+    if (correct) {
+      // Immediate advance: next question pops up and starts counting!
+      setTimeout(() => {
+        if (qIndex + 1 >= room.questionCount) {
+          setPhase("results");
+        } else {
+          setQIndex((i) => i + 1);
+          setSelected(null);
+          setSubmitted(false);
+          setRevealed(false);
+          setWinner("");
+          setTimeLeft(room.secondsPerQuestion);
+        }
+      }, 350);
+    } else {
+      // Wrong answer: reveal correct answer briefly then advance
+      setRevealed(true);
+      setTimeout(() => {
+        if (qIndex + 1 >= room.questionCount) {
+          setPhase("results");
+        } else {
+          setQIndex((i) => i + 1);
+          setSelected(null);
+          setSubmitted(false);
+          setRevealed(false);
+          setWinner("");
+          setTimeLeft(room.secondsPerQuestion);
+        }
+      }, 2200);
+    }
   }
 
   function handleCreateBattle(e: FormEvent) {
@@ -474,32 +499,23 @@ export default function BattleRoom() {
     if (!createTopic.trim()) return setError("Please select or enter a topic.");
 
     const newCode = `MED-${generateCode().slice(0, 4)}`;
+    const isScheduled = createStartMode === "later";
+
     const newRoom: Room = {
       code: newCode,
       kind: "battle",
       title: createTitle.trim(),
       topic: createTopic.trim(),
       exam: createExam || "NPMCN",
-      faculty: createFaculty || "Clinical Medicine",
+      faculty: createFaculty || "Basic Medical Sciences",
       questionCount: createQuestionCount,
       secondsPerQuestion: createSeconds,
       host: user?.name ?? "Doctor",
       players: [
         { name: user?.name ?? "Doctor", score: 0, answered: 0, correct: 0 },
-        { name: "Dr. Ade", score: 0, answered: 0, correct: 0 },
-        { name: "MedKing", score: 0, answered: 0, correct: 0 },
-        { name: "Chinedu", score: 0, answered: 0, correct: 0 },
-        { name: "Kemi T", score: 0, answered: 0, correct: 0 },
-        { name: "Ibrahim", score: 0, answered: 0, correct: 0 },
-        { name: "Habibat", score: 0, answered: 0, correct: 0 },
-        { name: "Fikayo", score: 0, answered: 0, correct: 0 },
-        { name: "Kimberly", score: 0, answered: 0, correct: 0 },
-        { name: "Dr. Sarah K.", score: 0, answered: 0, correct: 0 },
-        { name: "Dr. Michael R.", score: 0, answered: 0, correct: 0 },
-        { name: "Dr. Fatima A.", score: 0, answered: 0, correct: 0 },
       ],
-      status: "waiting",
-      scheduledFor: createStartMode === "later" ? createScheduledFor : undefined,
+      status: isScheduled ? "waiting" : "live",
+      scheduledFor: isScheduled ? createScheduledFor : undefined,
       visibility: createVisibility,
       currentQuestion: 0,
       createdAt: Date.now(),
@@ -507,7 +523,12 @@ export default function BattleRoom() {
 
     createRoom(newRoom);
     setRoom(newRoom);
-    setPhase("waiting");
+
+    if (isScheduled) {
+      setPhase("waiting");
+    } else {
+      startLiveBattleNow(newRoom);
+    }
     setFormSuccess("Battle created successfully!");
   }
 
@@ -527,22 +548,11 @@ export default function BattleRoom() {
         secondsPerQuestion: seedItem.secondsPerQuestion,
         host: seedItem.hostName,
         players: [
-          { name: user?.name ?? "Doctor", score: 74, answered: 3, correct: 3 },
-          { name: "MedKing", score: 68, answered: 3, correct: 3 },
-          { name: "Chinedu", score: 62, answered: 3, correct: 2 },
-          { name: "Kemi T", score: 54, answered: 3, correct: 2 },
-          { name: "Ibrahim", score: 48, answered: 3, correct: 2 },
-          { name: "Habibat", score: 42, answered: 3, correct: 2 },
-          { name: "Fikayo", score: 38, answered: 3, correct: 1 },
-          { name: "Kimberly", score: 31, answered: 3, correct: 1 },
-          { name: "Dr. Sarah K.", score: 28, answered: 3, correct: 1 },
-          { name: "Dr. Michael R.", score: 24, answered: 3, correct: 1 },
-          { name: "Dr. Fatima A.", score: 20, answered: 3, correct: 1 },
-          { name: "Dr. Emeka E.", score: 18, answered: 3, correct: 1 },
+          { name: seedItem.hostName, score: 0, answered: 0, correct: 0 },
         ],
         status: seedItem.status,
         visibility: "public",
-        currentQuestion: 3,
+        currentQuestion: 0,
         createdAt: Date.now(),
       });
     }
@@ -554,8 +564,16 @@ export default function BattleRoom() {
 
     const joined = joinRoom(targetRoom.code, user?.name ?? "Doctor") ?? targetRoom;
     setRoom(joined);
-    setPhase("game");
-    startLiveBattleNow(joined);
+
+    const isScheduled =
+      (joined.scheduledFor && new Date(joined.scheduledFor).getTime() > Date.now()) ||
+      joined.status === "waiting";
+
+    if (isScheduled) {
+      setPhase("waiting");
+    } else {
+      startLiveBattleNow(joined);
+    }
   }
 
   function startLiveBattleNow(existingRoom?: Room) {
@@ -567,28 +585,13 @@ export default function BattleRoom() {
       return;
     }
 
-    // Spawn bot participants up to 12
-    const needed = Math.max(0, Math.min(12 - current.players.length, 10));
-    const bots: Bot[] = [];
-    for (let i = 0; i < needed; i++) {
-      const name = BOT_NAMES[i % BOT_NAMES.length];
-      if (!current.players.some((pl) => pl.name === name)) {
-        current.players.push({ name, score: 30 + Math.floor(Math.random() * 40), answered: 3, correct: 2 });
-      }
-      bots.push({
-        name,
-        delay: 2 + Math.random() * (current.secondsPerQuestion - 6),
-        accuracy: 0.65 + Math.random() * 0.25,
-      });
-    }
-    botsRef.current = bots;
     setPool(p);
-    setQIndex(3); // Start on question 4 for immediate parity with Image 3, or question 0
-    setSelected("Inferior wall"); // Pre-select option B matching the reference image
+    setQIndex(0); // Always start from Question 1!
+    setSelected(null);
     setSubmitted(false);
     setRevealed(false);
     setWinner("");
-    setTimeLeft(23); // 23 seconds matching reference image
+    setTimeLeft(current.secondsPerQuestion);
     current.status = "live";
     saveRoom(current);
     setRoom({ ...current });
@@ -613,46 +616,53 @@ export default function BattleRoom() {
     });
   }, [selectedTopic, searchQuery, statusFilter]);
 
+  const copyRoomCode = () => {
+    if (!room) return;
+    navigator.clipboard?.writeText(room.code);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
   /* ========================================================
-     PHASE 1: LOBBY (Matches Image 2 SaaS Hub Exactly)
+     PHASE 1: LOBBY (Warm Burgundy & Cream Palette, No Blue)
      ======================================================== */
   if (phase === "lobby") {
     return (
       <div className="space-y-6 pb-12">
         {/* Top Hero Banner */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-700 via-blue-600 to-indigo-600 p-6 text-white shadow-xl sm:p-8">
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-blue-400/20 blur-3xl" />
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-burgundy-950 via-burgundy-900 to-burgundy-850 p-6 text-cream-50 shadow-xl sm:p-8 border border-burgundy-800/80">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-burgundy-600/20 blur-3xl" />
 
           <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
             {/* Banner Left Info */}
             <div className="max-w-xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-xl backdrop-blur-md shadow-inner">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-xl backdrop-blur-md shadow-inner border border-burgundy-700/60">
                   ⚔️
                 </div>
                 <div>
-                  <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
+                  <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl text-white">
                     Battle Room
                   </h1>
                 </div>
               </div>
-              <p className="mt-2 text-sm text-blue-100 sm:text-base leading-relaxed">
-                Practice MCQ battles, compete with real students.
-                Test speed & skills and climb the leaderboard.
+              <p className="mt-2 text-sm text-burgundy-100 sm:text-base leading-relaxed">
+                Practice MCQ battles and compete live with doctors and peers.
+                Test speed & diagnostic skills and climb the leaderboard.
               </p>
 
               {/* Stats badges */}
               <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur-md">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/70 border border-burgundy-700 px-3 py-1.5 backdrop-blur-md text-cream-100">
                   <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Live (14)
+                  Live Battles
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur-md">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/70 border border-burgundy-700 px-3 py-1.5 backdrop-blur-md text-cream-100">
                   📊 Real-time Leaderboard
                 </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1.5 backdrop-blur-md">
-                  ⚡ Battle Stats
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/70 border border-burgundy-700 px-3 py-1.5 backdrop-blur-md text-cream-100">
+                  ⚡ 2 Pts per Correct Recall
                 </span>
               </div>
             </div>
@@ -660,40 +670,40 @@ export default function BattleRoom() {
             {/* Banner Right Graphic: Two Doctors Facing Off */}
             <div className="relative flex shrink-0 items-center justify-center gap-4 py-2">
               <div className="flex flex-col items-center">
-                <div className="mb-1 rounded-lg bg-white/90 px-2 py-0.5 text-[11px] font-bold text-blue-900 shadow-sm animate-bounce">
-                  ...
+                <div className="mb-1 rounded-lg bg-white/95 px-2 py-0.5 text-[11px] font-bold text-burgundy-950 shadow-sm animate-bounce">
+                  Ready!
                 </div>
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/40 bg-gradient-to-tr from-blue-950 to-blue-800 shadow-lg">
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-amber-400/60 bg-gradient-to-tr from-burgundy-950 to-burgundy-800 shadow-lg">
                   <span className="text-2xl">👨‍⚕️</span>
                 </div>
-                <span className="mt-1 text-[11px] font-semibold text-blue-100">P1</span>
+                <span className="mt-1 text-[11px] font-semibold text-burgundy-200">Doctor 1</span>
               </div>
 
-              <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 font-extrabold text-white shadow-[0_0_15px_rgba(34,211,238,0.6)]">
+              <div className="relative z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-burgundy-600 font-extrabold text-white shadow-[0_0_15px_rgba(245,158,11,0.4)] border border-amber-300/40">
                 VS
               </div>
 
               <div className="flex flex-col items-center">
-                <div className="mb-1 rounded-lg bg-white/90 px-2 py-0.5 text-[11px] font-bold text-blue-900 shadow-sm animate-bounce">
-                  ?!
+                <div className="mb-1 rounded-lg bg-white/95 px-2 py-0.5 text-[11px] font-bold text-burgundy-950 shadow-sm animate-bounce">
+                  Let&apos;s go!
                 </div>
-                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-white/40 bg-gradient-to-tr from-indigo-950 to-indigo-800 shadow-lg">
+                <div className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-amber-400/60 bg-gradient-to-tr from-burgundy-950 to-burgundy-800 shadow-lg">
                   <span className="text-2xl">👩‍⚕️</span>
                 </div>
-                <span className="mt-1 text-[11px] font-semibold text-blue-100">P2</span>
+                <span className="mt-1 text-[11px] font-semibold text-burgundy-200">Doctor 2</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2">
+        <div className="flex items-center gap-2 border-b border-burgundy-200/80 pb-2">
           <button
             onClick={() => setActiveTab("browse")}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
               activeTab === "browse"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                ? "bg-burgundy-600 text-cream-50 shadow-sm"
+                : "text-burgundy-900 hover:bg-burgundy-100/70 hover:text-burgundy-950"
             }`}
           >
             <span>🧭</span>
@@ -703,8 +713,8 @@ export default function BattleRoom() {
             onClick={() => setActiveTab("my-battles")}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
               activeTab === "my-battles"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                ? "bg-burgundy-600 text-cream-50 shadow-sm"
+                : "text-burgundy-900 hover:bg-burgundy-100/70 hover:text-burgundy-950"
             }`}
           >
             <span>📋</span>
@@ -714,8 +724,8 @@ export default function BattleRoom() {
             onClick={() => setActiveTab("created-battles")}
             className={`flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition ${
               activeTab === "created-battles"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                ? "bg-burgundy-600 text-cream-50 shadow-sm"
+                : "text-burgundy-900 hover:bg-burgundy-100/70 hover:text-burgundy-950"
             }`}
           >
             <span>📁</span>
@@ -727,7 +737,7 @@ export default function BattleRoom() {
         <div className="space-y-3">
           <div className="grid gap-3 sm:grid-cols-12">
             <div className="relative sm:col-span-5 md:col-span-6">
-              <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+              <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-burgundy-400">
                 🔍
               </span>
               <input
@@ -735,7 +745,7 @@ export default function BattleRoom() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search battles by topic or title..."
-                className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 shadow-xs outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="w-full rounded-xl border border-burgundy-200 bg-white py-2.5 pl-10 pr-4 text-sm text-burgundy-950 shadow-xs outline-none focus:border-burgundy-600 focus:ring-2 focus:ring-burgundy-100"
               />
             </div>
 
@@ -743,7 +753,7 @@ export default function BattleRoom() {
               <select
                 value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-medium text-slate-700 shadow-xs outline-none focus:border-blue-500"
+                className="flex-1 rounded-xl border border-burgundy-200 bg-white px-3 py-2.5 text-xs font-medium text-burgundy-900 shadow-xs outline-none focus:border-burgundy-600"
               >
                 <option value="all">Type: All</option>
                 <option value="rapid">Speed Battle</option>
@@ -753,7 +763,7 @@ export default function BattleRoom() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-medium text-slate-700 shadow-xs outline-none focus:border-blue-500"
+                className="flex-1 rounded-xl border border-burgundy-200 bg-white px-3 py-2.5 text-xs font-medium text-burgundy-900 shadow-xs outline-none focus:border-burgundy-600"
               >
                 <option value="all">Status: All</option>
                 <option value="live">Live Now</option>
@@ -761,7 +771,7 @@ export default function BattleRoom() {
               </select>
 
               <select
-                className="flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs font-medium text-slate-700 shadow-xs outline-none focus:border-blue-500"
+                className="flex-1 rounded-xl border border-burgundy-200 bg-white px-3 py-2.5 text-xs font-medium text-burgundy-900 shadow-xs outline-none focus:border-burgundy-600"
               >
                 <option value="popular">Sort: Most Popular</option>
                 <option value="newest">Sort: Newest</option>
@@ -780,8 +790,8 @@ export default function BattleRoom() {
                   onClick={() => setSelectedTopic(chip)}
                   className={`shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
                     active
-                      ? "bg-blue-600 text-white shadow-xs"
-                      : "border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                      ? "bg-burgundy-600 text-cream-50 shadow-xs"
+                      : "border border-burgundy-200 bg-white text-burgundy-900 hover:border-burgundy-300 hover:bg-cream-100/60"
                   }`}
                 >
                   {chip}
@@ -802,8 +812,8 @@ export default function BattleRoom() {
           <div className="space-y-4 lg:col-span-8">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">Public Battles</h2>
-                <p className="text-xs text-slate-500">
+                <h2 className="text-lg font-bold text-burgundy-950">Public Battles</h2>
+                <p className="text-xs text-burgundy-800/70">
                   Join a live battle or wait for an upcoming session
                 </p>
               </div>
@@ -823,11 +833,11 @@ export default function BattleRoom() {
                   value={joinCodeInput}
                   onChange={(e) => setJoinCodeInput(e.target.value)}
                   placeholder="Private Code"
-                  className="w-28 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-900 outline-none focus:border-blue-500"
+                  className="w-28 rounded-lg border border-burgundy-200 bg-white px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-burgundy-950 outline-none focus:border-burgundy-600"
                 />
                 <button
                   type="submit"
-                  className="rounded-lg bg-slate-800 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-900 transition"
+                  className="rounded-lg bg-burgundy-600 px-3 py-1.5 text-xs font-semibold text-cream-50 hover:bg-burgundy-700 transition"
                 >
                   Join
                 </button>
@@ -840,35 +850,35 @@ export default function BattleRoom() {
                 {battles.map((b) => (
                   <div
                     key={b.code}
-                    className="flex flex-col justify-between gap-4 rounded-2xl border border-blue-200 bg-blue-50/50 p-5 shadow-xs transition hover:shadow-md sm:flex-row sm:items-center"
+                    className="flex flex-col justify-between gap-4 rounded-2xl border border-burgundy-200 bg-burgundy-50/50 p-5 shadow-xs transition hover:shadow-md sm:flex-row sm:items-center"
                   >
                     <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-xl text-white shadow-sm">
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-burgundy-600 text-xl text-cream-50 shadow-sm">
                         🩺
                       </div>
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <h3 className="font-bold text-slate-900">{b.title}</h3>
-                          <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-bold text-blue-800">
+                          <h3 className="font-bold text-burgundy-950">{b.title}</h3>
+                          <span className="rounded-full bg-burgundy-100 px-2 py-0.5 text-[11px] font-bold text-burgundy-800">
                             Custom Room
                           </span>
                           <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
                             ● {b.status.toUpperCase()}
                           </span>
                         </div>
-                        <p className="mt-1 text-xs text-slate-600">
+                        <p className="mt-1 text-xs text-burgundy-800/80">
                           {b.faculty} · {b.topic} · {b.questionCount} questions · {b.secondsPerQuestion}s each
                         </p>
-                        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-burgundy-800/70">
                           <span>👥 {b.players.length}/20 joined</span>
                           <span>👑 Host: {b.host}</span>
-                          <span className="font-mono font-bold text-blue-700">Code: {b.code}</span>
+                          <span className="font-mono font-bold text-burgundy-700">Code: {b.code}</span>
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={() => handleJoinSeedOrCustom(b.code)}
-                      className="shrink-0 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition"
+                      className="shrink-0 rounded-xl bg-burgundy-600 px-5 py-2.5 text-sm font-bold text-cream-50 shadow-sm hover:bg-burgundy-700 transition"
                     >
                       Join Battle
                     </button>
@@ -882,7 +892,7 @@ export default function BattleRoom() {
               {filteredBattles.map((b) => (
                 <div
                   key={b.code}
-                  className="flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs transition hover:border-blue-200 hover:shadow-md sm:flex-row sm:items-center"
+                  className="flex flex-col justify-between gap-4 rounded-2xl border border-burgundy-100 bg-white p-5 shadow-xs transition hover:border-burgundy-300 hover:shadow-md sm:flex-row sm:items-center"
                 >
                   <div className="flex items-start gap-4">
                     <div
@@ -897,7 +907,7 @@ export default function BattleRoom() {
 
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-bold text-slate-900">{b.title}</h3>
+                        <h3 className="font-bold text-burgundy-950">{b.title}</h3>
                         {b.status === "live" ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -910,11 +920,11 @@ export default function BattleRoom() {
                         )}
                       </div>
 
-                      <p className="mt-1 text-xs text-slate-500 line-clamp-1">
+                      <p className="mt-1 text-xs text-burgundy-800/80 line-clamp-1">
                         {b.subtitle}
                       </p>
 
-                      <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-slate-500">
+                      <div className="mt-2.5 flex flex-wrap items-center gap-2.5 text-xs text-burgundy-800/70">
                         <span
                           className={`rounded-md px-2 py-0.5 text-[11px] font-bold ${b.badgeBg} ${b.badgeText}`}
                         >
@@ -926,8 +936,8 @@ export default function BattleRoom() {
                         <span className="inline-flex items-center gap-1">
                           ⏱ {b.duration}
                         </span>
-                        <span className="inline-flex items-center gap-1 text-slate-600 font-medium">
-                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-slate-200 text-[9px]">
+                        <span className="inline-flex items-center gap-1 text-burgundy-900 font-medium">
+                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-burgundy-100 text-[9px]">
                             👨‍⚕️
                           </span>
                           Hosted by {b.hostName}
@@ -939,7 +949,7 @@ export default function BattleRoom() {
                   <div className="shrink-0 sm:text-right">
                     <button
                       onClick={() => handleJoinSeedOrCustom(b.code, b)}
-                      className="w-full rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-700 transition sm:w-auto"
+                      className="w-full rounded-xl bg-burgundy-600 px-6 py-2.5 text-sm font-bold text-cream-50 shadow-sm hover:bg-burgundy-700 transition sm:w-auto"
                     >
                       Join Battle
                     </button>
@@ -951,15 +961,15 @@ export default function BattleRoom() {
 
           {/* Right Panel: Create Battle */}
           <div className="lg:col-span-4">
-            <div className="sticky top-20 rounded-2xl border border-slate-200/90 bg-white p-6 shadow-sm">
+            <div className="sticky top-20 rounded-2xl border border-burgundy-200/90 bg-white p-6 shadow-sm">
               <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 text-lg">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-burgundy-50 text-burgundy-700 text-lg">
                   🛡️
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">Create Battle</h2>
-                  <p className="mt-0.5 text-xs text-slate-500 leading-relaxed">
-                    Set up a new MCQ battle and invite your peers to join. Choose topic, timer, question count and live chat mode.
+                  <h2 className="text-base font-bold text-burgundy-950">Create Battle</h2>
+                  <p className="mt-0.5 text-xs text-burgundy-800/70 leading-relaxed">
+                    Set up a new MCQ battle with topic-specific questions and invite peers to join.
                   </p>
                 </div>
               </div>
@@ -972,41 +982,49 @@ export default function BattleRoom() {
 
               <form onSubmit={handleCreateBattle} className="mt-5 space-y-4 text-xs">
                 <div>
-                  <label className="block font-semibold text-slate-800 mb-1">
+                  <label className="block font-semibold text-burgundy-950 mb-1">
                     Battle Title
                   </label>
                   <input
                     type="text"
                     value={createTitle}
                     onChange={(e) => setCreateTitle(e.target.value)}
-                    placeholder="e.g. Cardiology Battle Room"
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
+                    placeholder="e.g. Physiology Battle Room"
+                    className="w-full rounded-lg border border-burgundy-200 px-3 py-2 text-xs text-burgundy-950 outline-none focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-100"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-800 mb-1">
-                    Topic
+                  <label className="block font-semibold text-burgundy-950 mb-1">
+                    Topic (Questions will populate dynamically for this topic)
                   </label>
                   <select
                     value={createTopic}
-                    onChange={(e) => setCreateTopic(e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 outline-none focus:border-blue-500"
+                    onChange={(e) => {
+                      setCreateTopic(e.target.value);
+                      if (e.target.value === "Physiology" || e.target.value === "Pharmacology") {
+                        setCreateFaculty("Basic Medical Sciences");
+                      } else if (e.target.value === "Radiography") {
+                        setCreateFaculty("Radiology");
+                      }
+                    }}
+                    className="w-full rounded-lg border border-burgundy-200 bg-white px-3 py-2 text-xs text-burgundy-950 outline-none focus:border-burgundy-600"
                   >
+                    <option value="Physiology">Physiology</option>
+                    <option value="Radiography">Radiography & Imaging</option>
                     <option value="Cardiology">Cardiology</option>
+                    <option value="Pharmacology">Pharmacology</option>
                     <option value="Anatomy">Anatomy</option>
                     <option value="Surgery">Surgery</option>
                     <option value="Paediatrics">Paediatrics</option>
                     <option value="Obstetrics & Gynaecology">Obstetrics & Gynaecology</option>
-                    <option value="Pharmacology">Pharmacology</option>
                     <option value="Pathology">Pathology</option>
-                    <option value="Radiology">Radiology</option>
                     <option value="Internal Medicine">Internal Medicine</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-semibold text-slate-800 mb-1">
+                  <label className="block font-semibold text-burgundy-950 mb-1">
                     Description (optional)
                   </label>
                   <textarea
@@ -1014,24 +1032,24 @@ export default function BattleRoom() {
                     value={createDescription}
                     onChange={(e) => setCreateDescription(e.target.value)}
                     placeholder="Quick notes about what this battle will cover..."
-                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-100"
+                    className="w-full rounded-lg border border-burgundy-200 px-3 py-2 text-xs text-burgundy-950 outline-none focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-100"
                   />
                 </div>
 
-                <div className="pt-2 border-t border-slate-100">
-                  <span className="block font-bold text-slate-900 text-xs mb-2">
+                <div className="pt-2 border-t border-burgundy-100">
+                  <span className="block font-bold text-burgundy-950 text-xs mb-2">
                     Battle Settings
                   </span>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                      <label className="block text-[11px] font-medium text-burgundy-800/80 mb-1">
                         Questions
                       </label>
                       <select
                         value={createQuestionCount}
                         onChange={(e) => setCreateQuestionCount(Number(e.target.value))}
-                        className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs"
+                        className="w-full rounded-lg border border-burgundy-200 bg-white px-2 py-1.5 text-xs text-burgundy-950"
                       >
                         <option value={10}>10 questions</option>
                         <option value={15}>15 questions</option>
@@ -1042,13 +1060,13 @@ export default function BattleRoom() {
                     </div>
 
                     <div>
-                      <label className="block text-[11px] font-medium text-slate-600 mb-1">
+                      <label className="block text-[11px] font-medium text-burgundy-800/80 mb-1">
                         Time per question
                       </label>
                       <select
                         value={createSeconds}
                         onChange={(e) => setCreateSeconds(Number(e.target.value))}
-                        className="w-full rounded-lg border border-slate-200 bg-white px-2 py-1.5 text-xs"
+                        className="w-full rounded-lg border border-burgundy-200 bg-white px-2 py-1.5 text-xs text-burgundy-950"
                       >
                         <option value={20}>20 seconds</option>
                         <option value={30}>30 seconds</option>
@@ -1060,7 +1078,7 @@ export default function BattleRoom() {
                 </div>
 
                 <div>
-                  <span className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  <span className="block text-[11px] font-semibold text-burgundy-950 mb-1">
                     Visibility
                   </span>
                   <div className="space-y-1.5">
@@ -1070,9 +1088,9 @@ export default function BattleRoom() {
                         name="visibility"
                         checked={createVisibility === "public"}
                         onChange={() => setCreateVisibility("public")}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="text-burgundy-600 focus:ring-burgundy-500"
                       />
-                      <span className="text-slate-700 font-medium">Public (anyone can join)</span>
+                      <span className="text-burgundy-900 font-medium">Public (anyone can join)</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -1080,15 +1098,15 @@ export default function BattleRoom() {
                         name="visibility"
                         checked={createVisibility === "private"}
                         onChange={() => setCreateVisibility("private")}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="text-burgundy-600 focus:ring-burgundy-500"
                       />
-                      <span className="text-slate-700 font-medium">Private (code only)</span>
+                      <span className="text-burgundy-900 font-medium">Private (code only)</span>
                     </label>
                   </div>
                 </div>
 
                 <div>
-                  <span className="block text-[11px] font-semibold text-slate-700 mb-1">
+                  <span className="block text-[11px] font-semibold text-burgundy-950 mb-1">
                     Start Mode
                   </span>
                   <div className="space-y-1.5">
@@ -1098,9 +1116,9 @@ export default function BattleRoom() {
                         name="startMode"
                         checked={createStartMode === "now"}
                         onChange={() => setCreateStartMode("now")}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="text-burgundy-600 focus:ring-burgundy-500"
                       />
-                      <span className="text-slate-700 font-medium">Start immediately</span>
+                      <span className="text-burgundy-900 font-medium">Start immediately</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -1108,9 +1126,9 @@ export default function BattleRoom() {
                         name="startMode"
                         checked={createStartMode === "later"}
                         onChange={() => setCreateStartMode("later")}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="text-burgundy-600 focus:ring-burgundy-500"
                       />
-                      <span className="text-slate-700 font-medium">Schedule for later</span>
+                      <span className="text-burgundy-900 font-medium">Schedule for later</span>
                     </label>
                   </div>
                   {createStartMode === "later" && (
@@ -1118,25 +1136,25 @@ export default function BattleRoom() {
                       type="datetime-local"
                       value={createScheduledFor}
                       onChange={(e) => setCreateScheduledFor(e.target.value)}
-                      className="mt-2 w-full rounded-lg border border-slate-200 px-2 py-1.5 text-xs text-slate-800"
+                      className="mt-2 w-full rounded-lg border border-burgundy-200 px-2 py-1.5 text-xs text-burgundy-950"
                     />
                   )}
                 </div>
 
-                <div className="pt-2 border-t border-slate-100 space-y-2.5">
-                  <span className="block font-bold text-slate-900 text-xs">
+                <div className="pt-2 border-t border-burgundy-100 space-y-2.5">
+                  <span className="block font-bold text-burgundy-950 text-xs">
                     Host Privileges
                   </span>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-slate-800">Allow public live chat</p>
-                      <p className="text-[10px] text-slate-500">Up to 20 doctors can message in real-time</p>
+                      <p className="font-semibold text-burgundy-950">Allow public live chat</p>
+                      <p className="text-[10px] text-burgundy-800/70">Real-time room chat for all joined doctors</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setAllowLiveChat(!allowLiveChat)}
                       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                        allowLiveChat ? "bg-blue-600" : "bg-slate-300"
+                        allowLiveChat ? "bg-burgundy-600" : "bg-burgundy-200"
                       }`}
                     >
                       <span
@@ -1149,14 +1167,14 @@ export default function BattleRoom() {
 
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="font-semibold text-slate-800">Host can kick / pause</p>
-                      <p className="text-[10px] text-slate-500">Moderate players and session flow</p>
+                      <p className="font-semibold text-burgundy-950">Host can kick / pause</p>
+                      <p className="text-[10px] text-burgundy-800/70">Moderate participants and flow</p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setHostCanKick(!hostCanKick)}
                       className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
-                        hostCanKick ? "bg-blue-600" : "bg-slate-300"
+                        hostCanKick ? "bg-burgundy-600" : "bg-burgundy-200"
                       }`}
                     >
                       <span
@@ -1170,7 +1188,7 @@ export default function BattleRoom() {
 
                 <button
                   type="submit"
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-md hover:bg-blue-700 active:scale-[0.99] transition"
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-burgundy-600 py-3 text-sm font-bold text-cream-50 shadow-md hover:bg-burgundy-700 active:scale-[0.99] transition"
                 >
                   <span>⚔️</span>
                   <span>Create Battle</span>
@@ -1184,50 +1202,244 @@ export default function BattleRoom() {
   }
 
   /* ========================================================
-     PHASE 2 & 3: LIVE BATTLE ARENA (Matches Image 3 Exactly!)
+     PHASE 2: SCHEDULED BATTLE (WAITING FOR TIME TO START)
+     Questions do not pop up; countdown message is shown!
      ======================================================== */
-  if ((phase === "game" || phase === "waiting") && room) {
-    const isLive = phase === "game";
-    const currentQuestionDisplay = isLive && question ? question : {
-      text: "A patient presents with crushing chest pain and ST elevation in leads II, III and aVF. Which area of the heart is most likely affected?",
-      topic: "Cardiology",
-      faculty: "Internal Medicine",
-      options: ["Anterior wall", "Inferior wall", "Lateral wall", "Septal wall"],
-      correct: "Inferior wall",
-      explanation: "ST elevations in leads II, III, and aVF reflect an acute inferior wall myocardial infarction (usually due to Right Coronary Artery occlusion).",
-    };
-
-    const pct = isLive ? (timeLeft / room.secondsPerQuestion) * 100 : 100;
-    
-    // Sort players for leaderboard
-    const arenaPlayers = room.players.length >= 8 ? room.players : DEFAULT_ARENA_PLAYERS;
-    const sortedLeaderboard = [...arenaPlayers].sort((a, b) => b.score - a.score);
-
-    const copyRoomCode = () => {
-      navigator.clipboard?.writeText(room.code);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2000);
-    };
+  if (phase === "waiting" && room) {
+    const isHost = room.host === (user?.name ?? "Doctor");
+    const scheduledDateFormatted = room.scheduledFor
+      ? new Date(room.scheduledFor).toLocaleString(undefined, {
+          dateStyle: "medium",
+          timeStyle: "short",
+        })
+      : null;
 
     return (
-      <div className="-mx-4 -my-8 min-h-screen bg-[#070e1a] text-slate-100 p-4 sm:p-6 lg:p-8 font-sans selection:bg-cyan-500 selection:text-slate-950">
-        
-        {/* Arena Top Navigation Header */}
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+      <div className="-mx-4 -my-8 min-h-screen bg-gradient-to-b from-burgundy-950 via-[#220008] to-burgundy-950 text-cream-50 p-4 sm:p-6 lg:p-8 font-sans selection:bg-burgundy-600 selection:text-white">
+        {/* Navigation Header */}
+        <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-burgundy-800/80 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 font-bold shadow-md shadow-emerald-500/20">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-burgundy-600 to-amber-600 text-white font-bold shadow-md shadow-burgundy-900/50">
               ✚
             </div>
             <div>
               <span className="text-lg font-black tracking-tight text-white sm:text-xl">
                 Medscope
               </span>
-              <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-burgundy-300">
                 <span>Learn</span>
                 <span>›</span>
                 <span>Practice</span>
                 <span>›</span>
-                <span className="text-cyan-400 font-semibold">Battle Room</span>
+                <span className="text-amber-400 font-semibold">Scheduled Battle Waiting</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setPhase("lobby")}
+              className="flex items-center gap-1.5 rounded-xl border border-burgundy-700/80 bg-burgundy-900/80 px-3.5 py-1.5 text-xs font-semibold text-burgundy-200 hover:border-burgundy-500 hover:text-white transition"
+            >
+              <span>←</span>
+              <span>Back to Lobby</span>
+            </button>
+
+            {/* User Pill */}
+            <div className="flex items-center gap-2 rounded-xl border border-burgundy-800 bg-burgundy-900/90 py-1 pl-1 pr-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy-700 text-xs font-bold text-cream-50">
+                {user.name ? user.name[0] : "D"}
+              </div>
+              <span className="text-xs font-semibold text-cream-100">
+                {user.name || "Doctor"}
+              </span>
+            </div>
+          </div>
+        </header>
+
+        {/* 2-Column Scheduled Waiting Room */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 items-start">
+          {/* Main Waiting Card */}
+          <div className="space-y-5 lg:col-span-7">
+            <div className="rounded-3xl border border-burgundy-800/90 bg-[#36000e]/80 backdrop-blur-md p-6 sm:p-8 shadow-2xl text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/20 text-3xl shadow-inner border border-amber-500/40">
+                ⏳
+              </div>
+
+              <div className="mt-4">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 px-3.5 py-1 text-xs font-bold text-amber-300 uppercase tracking-wider">
+                  <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                  Scheduled Battle Session
+                </span>
+              </div>
+
+              <h1 className="mt-3 text-2xl font-black text-white sm:text-3xl">
+                {room.title}
+              </h1>
+
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs text-burgundy-200">
+                <span className="rounded-md bg-burgundy-800/80 px-2.5 py-1 font-semibold text-amber-300 border border-burgundy-700">
+                  {room.topic}
+                </span>
+                <span>•</span>
+                <span>{room.faculty}</span>
+                <span>•</span>
+                <span>{room.questionCount} Questions</span>
+                <span>•</span>
+                <span>{room.secondsPerQuestion}s per question</span>
+              </div>
+
+              {/* Big Scheduled Countdown Clock */}
+              <div className="my-6 rounded-2xl border border-amber-500/30 bg-burgundy-950/70 p-6 shadow-inner">
+                <p className="text-xs font-bold tracking-widest text-amber-400 uppercase">
+                  Battle Starts In
+                </p>
+                <p className="mt-2 font-mono text-3xl sm:text-5xl font-black text-white tracking-wider">
+                  {scheduledCountdown || "Waiting for countdown..."}
+                </p>
+                {scheduledDateFormatted && (
+                  <p className="mt-2 text-xs text-burgundy-300">
+                    Scheduled for {scheduledDateFormatted}
+                  </p>
+                )}
+              </div>
+
+              {/* Room Code Card */}
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 rounded-2xl border border-burgundy-800 bg-burgundy-900/60 p-4 text-left">
+                <div>
+                  <span className="text-[11px] font-semibold text-burgundy-300 block">
+                    Invite colleagues to join this battle:
+                  </span>
+                  <span className="font-mono text-lg font-black tracking-widest text-amber-300">
+                    {room.code}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={copyRoomCode}
+                  className="rounded-xl bg-burgundy-800 hover:bg-burgundy-700 border border-burgundy-600 px-4 py-2 text-xs font-bold text-cream-50 transition"
+                >
+                  {copiedCode ? "✓ Code Copied!" : "📋 Copy Room Code"}
+                </button>
+              </div>
+
+              {/* Host actions */}
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                {isHost && (
+                  <button
+                    type="button"
+                    onClick={() => startLiveBattleNow()}
+                    className="rounded-xl bg-gradient-to-r from-burgundy-600 via-burgundy-500 to-amber-600 hover:from-burgundy-500 hover:to-amber-500 px-6 py-3 text-sm font-black text-white shadow-lg transition active:scale-95"
+                  >
+                    ⚔️ Start Battle Now (Skip Wait)
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setPhase("lobby")}
+                  className="rounded-xl border border-burgundy-700 bg-burgundy-900/90 px-5 py-3 text-sm font-bold text-burgundy-200 hover:text-white transition"
+                >
+                  Back to Hub
+                </button>
+              </div>
+            </div>
+
+            {/* Participants in Room */}
+            <div className="rounded-2xl border border-burgundy-800/90 bg-[#36000e]/80 p-5 shadow-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-burgundy-800">
+                <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                  <span>👥</span>
+                  <span>Joined Doctors ({room.players.length} / 20)</span>
+                </h3>
+                <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
+                  Ready
+                </span>
+              </div>
+
+              <div className="mt-3 space-y-2">
+                {room.players.map((p, idx) => (
+                  <div
+                    key={p.name}
+                    className="flex items-center justify-between rounded-xl bg-burgundy-950/40 p-2.5 border border-burgundy-800/60"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-burgundy-800 text-xs font-bold text-cream-50">
+                        {p.name.slice(0, 1)}
+                      </div>
+                      <span className="truncate text-xs font-semibold text-cream-100">
+                        {p.name} {p.name === user.name && "(You)"}
+                      </span>
+                    </div>
+                    {idx === 0 ? (
+                      <span className="rounded bg-amber-500/20 border border-amber-500/40 px-2 py-0.5 text-[10px] font-bold text-amber-300">
+                        Host
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-mono text-emerald-400">
+                        Connected
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Live Chat while Waiting */}
+          <div className="lg:col-span-5">
+            <BattleChat
+              roomCode={room.code}
+              currentUserId={user.id}
+              currentUserName={user.name || "Doctor"}
+              isHost={isHost}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ========================================================
+     PHASE 3: LIVE BATTLE ARENA (Active MCQ Game)
+     Dynamic questions according to topic; instant advance on correct!
+     ======================================================== */
+  if (phase === "game" && room) {
+    const currentQuestionDisplay = question || {
+      text: `Clinical case in ${room.topic}: select the most appropriate diagnosis or management.`,
+      topic: room.topic,
+      faculty: room.faculty,
+      options: ["Option A", "Option B", "Option C", "Option D"],
+      correct: "Option A",
+      explanation: "Targeted clinical diagnostic approach provides optimal management.",
+    };
+
+    const pct = (timeLeft / room.secondsPerQuestion) * 100;
+    const sortedLeaderboard = [...room.players].sort((a, b) => b.score - a.score);
+
+    const isCardioTopic =
+      room.topic.toLowerCase().includes("cardio") ||
+      currentQuestionDisplay.text.toLowerCase().includes("ecg") ||
+      currentQuestionDisplay.text.toLowerCase().includes("lead");
+
+    return (
+      <div className="-mx-4 -my-8 min-h-screen bg-gradient-to-b from-burgundy-950 via-[#220008] to-burgundy-950 text-cream-50 p-4 sm:p-6 lg:p-8 font-sans selection:bg-burgundy-600 selection:text-white">
+        
+        {/* Arena Top Navigation Header */}
+        <header className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-burgundy-800/80 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-burgundy-600 to-amber-600 text-white font-bold shadow-md shadow-burgundy-900/50">
+              ✚
+            </div>
+            <div>
+              <span className="text-lg font-black tracking-tight text-white sm:text-xl">
+                Medscope
+              </span>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-burgundy-300">
+                <span>Learn</span>
+                <span>›</span>
+                <span>Practice</span>
+                <span>›</span>
+                <span className="text-amber-400 font-semibold">Battle Arena</span>
               </div>
             </div>
           </div>
@@ -1235,60 +1447,56 @@ export default function BattleRoom() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setPhase("lobby")}
-              className="flex items-center gap-1.5 rounded-xl border border-slate-700/80 bg-slate-900/80 px-3.5 py-1.5 text-xs font-semibold text-slate-300 hover:border-slate-500 hover:text-white transition"
+              className="flex items-center gap-1.5 rounded-xl border border-burgundy-700/80 bg-burgundy-900/80 px-3.5 py-1.5 text-xs font-semibold text-burgundy-200 hover:border-burgundy-500 hover:text-white transition"
             >
               <span>←</span>
               <span>Back to Lobby</span>
             </button>
 
             {/* Notification Bell */}
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-slate-800 bg-slate-900 text-slate-300">
+            <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-burgundy-800 bg-burgundy-900 text-burgundy-300">
               🔔
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-rose-500" />
             </div>
 
             {/* User Pill */}
-            <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/90 py-1 pl-1 pr-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-xs font-bold text-white">
+            <div className="flex items-center gap-2 rounded-xl border border-burgundy-800 bg-burgundy-900/90 py-1 pl-1 pr-3">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-burgundy-700 text-xs font-bold text-cream-50">
                 {user.name ? user.name[0] : "D"}
               </div>
-              <span className="text-xs font-semibold text-slate-200">
+              <span className="text-xs font-semibold text-cream-100">
                 {user.name || "Doctor"}
               </span>
             </div>
           </div>
         </header>
 
-        {/* ========================================================
-            3-COLUMN LIVE COMMAND CENTER ARENA (Matches Image 3 Exactly!)
-            ======================================================== */}
+        {/* 3-COLUMN LIVE COMMAND CENTER ARENA */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-12 items-start">
           
-          {/* ====================================================
-              COLUMN 1: LEFT SIDEBAR (Room Info & Leaderboard)
-              ==================================================== */}
+          {/* COLUMN 1: LEFT SIDEBAR (Room Info & Leaderboard) */}
           <div className="space-y-4 lg:col-span-3">
             
             {/* Room Info Card */}
-            <div className="rounded-2xl border border-slate-800/90 bg-[#0d1629] p-5 shadow-lg">
+            <div className="rounded-2xl border border-burgundy-800/90 bg-[#36000e]/80 backdrop-blur-md p-5 shadow-xl">
               <button
                 onClick={() => setPhase("lobby")}
-                className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-cyan-400 transition"
+                className="mb-4 inline-flex items-center gap-1.5 text-xs font-semibold text-burgundy-300 hover:text-amber-300 transition"
               >
                 <span>←</span>
                 <span>Back to Rooms</span>
               </button>
 
               <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-400 to-emerald-500 text-slate-950 font-bold text-xl shadow-lg shadow-teal-500/20">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-tr from-burgundy-600 to-amber-600 text-white font-bold text-xl shadow-lg shadow-burgundy-900/40">
                   🩺
                 </div>
                 <div>
                   <h2 className="font-extrabold text-white text-base leading-snug">
-                    {room.title || "Cardiology Battle Room"}
+                    {room.title}
                   </h2>
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    Test your knowledge & beat peers
+                  <p className="mt-0.5 text-xs text-burgundy-300">
+                    Live MCQ Showdown
                   </p>
                 </div>
               </div>
@@ -1299,23 +1507,23 @@ export default function BattleRoom() {
                   <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
                   LIVE
                 </span>
-                <span className="text-[11px] font-semibold text-slate-400">
-                  {room.topic || "Cardiology"}
+                <span className="text-[11px] font-semibold text-amber-300">
+                  {room.topic}
                 </span>
               </div>
 
               {/* Metadata List */}
-              <div className="mt-5 space-y-3 border-t border-slate-800/80 pt-4 text-xs">
+              <div className="mt-5 space-y-3 border-t border-burgundy-800/80 pt-4 text-xs">
                 {/* Room Code */}
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">🏷️ Room Code:</span>
+                  <span className="text-burgundy-300">🏷️ Room Code:</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="font-mono font-bold tracking-wider text-cyan-300">
+                    <span className="font-mono font-bold tracking-wider text-amber-300">
                       {room.code}
                     </span>
                     <button
                       onClick={copyRoomCode}
-                      className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+                      className="rounded p-1 text-burgundy-300 hover:bg-burgundy-800 hover:text-white"
                       title="Copy code"
                     >
                       {copiedCode ? "✓" : "📋"}
@@ -1325,24 +1533,24 @@ export default function BattleRoom() {
 
                 {/* Players */}
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">👥 Players:</span>
-                  <span className="font-bold text-slate-200">
-                    {arenaPlayers.length} / 20
+                  <span className="text-burgundy-300">👥 Players:</span>
+                  <span className="font-bold text-cream-100">
+                    {room.players.length} / 20
                   </span>
                 </div>
 
                 {/* Time per Question */}
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">⏱️ Time per question:</span>
-                  <span className="font-bold text-slate-200">
+                  <span className="text-burgundy-300">⏱️ Time per question:</span>
+                  <span className="font-bold text-cream-100">
                     {room.secondsPerQuestion} Seconds
                   </span>
                 </div>
 
                 {/* Total Questions */}
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-400">❓ Total Questions:</span>
-                  <span className="font-bold text-slate-200">
+                  <span className="text-burgundy-300">❓ Total Questions:</span>
+                  <span className="font-bold text-cream-100">
                     {room.questionCount}
                   </span>
                 </div>
@@ -1350,22 +1558,22 @@ export default function BattleRoom() {
             </div>
 
             {/* Leaderboard Card */}
-            <div className="rounded-2xl border border-slate-800/90 bg-[#0d1629] p-5 shadow-lg">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            <div className="rounded-2xl border border-burgundy-800/90 bg-[#36000e]/80 p-5 shadow-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-burgundy-800/80">
                 <div className="flex items-center gap-2">
                   <span className="text-base">🏆</span>
                   <h3 className="font-bold text-sm text-white">Leaderboard</h3>
                 </div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                <span className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">
                   Live Pts
                 </span>
               </div>
 
               {/* Leaderboard List */}
               <div className="mt-3 space-y-2.5 max-h-72 overflow-y-auto pr-1 scrollbar-none">
-                {sortedLeaderboard.slice(0, 8).map((p, idx) => {
+                {sortedLeaderboard.map((p, idx) => {
                   let badge = (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-slate-800 text-[10px] font-bold text-slate-400">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-burgundy-950 text-[10px] font-bold text-burgundy-300">
                       {idx + 1}
                     </span>
                   );
@@ -1373,27 +1581,27 @@ export default function BattleRoom() {
                   if (idx === 1) badge = <span className="text-sm">🥈</span>;
                   if (idx === 2) badge = <span className="text-sm">🥉</span>;
 
-                  const isMe = p.name === user.name;
+                  const isMe = p.name === (user?.name ?? "Doctor");
 
                   return (
                     <div
                       key={p.name}
                       className={`flex items-center justify-between rounded-xl px-2.5 py-1.5 transition ${
                         isMe
-                          ? "bg-cyan-500/10 border border-cyan-500/30 text-cyan-200 font-bold"
-                          : "text-slate-300 hover:bg-slate-800/50"
+                          ? "bg-amber-500/15 border border-amber-500/40 text-amber-200 font-bold"
+                          : "text-cream-100 hover:bg-burgundy-900/50"
                       }`}
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
                         {badge}
-                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-800 text-[11px] font-semibold text-slate-300">
+                        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-burgundy-800 text-[11px] font-semibold text-cream-100">
                           {p.name.slice(0, 1)}
                         </div>
                         <span className="truncate text-xs font-medium">
                           {p.name} {isMe && "(You)"}
                         </span>
                       </div>
-                      <span className="font-mono text-xs font-bold text-cyan-400 shrink-0">
+                      <span className="font-mono text-xs font-bold text-amber-400 shrink-0">
                         {p.score} pts
                       </span>
                     </div>
@@ -1401,47 +1609,44 @@ export default function BattleRoom() {
                 })}
               </div>
 
-              <button
-                type="button"
-                className="mt-3 block w-full text-center text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition"
-              >
-                View all players →
-              </button>
+              {room.players.length === 1 && (
+                <p className="mt-3 text-[11px] text-burgundy-300 text-center">
+                  Share code <strong className="text-amber-300">{room.code}</strong> to battle peers!
+                </p>
+              )}
             </div>
           </div>
 
-          {/* ====================================================
-              COLUMN 2: CENTER ARENA (HUD, Question, ECG, Options, Submit)
-              ==================================================== */}
+          {/* COLUMN 2: CENTER ARENA (HUD, Question, ECG if cardio, Options, Submit) */}
           <div className="space-y-4 lg:col-span-6">
             
             {/* Top HUD Card: Question Counter + Progress Bar + Digital Timer */}
-            <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-800/90 bg-[#0d1629] p-4 shadow-lg">
-              <span className="text-xs sm:text-sm font-bold text-slate-200 shrink-0">
+            <div className="flex items-center justify-between gap-4 rounded-2xl border border-burgundy-800/90 bg-[#36000e]/80 p-4 shadow-xl">
+              <span className="text-xs sm:text-sm font-bold text-cream-100 shrink-0">
                 Question {String(qIndex + 1).padStart(2, "0")} / {room.questionCount}
               </span>
 
-              {/* Cyan Gradient Progress Bar */}
-              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-slate-800/90 shadow-inner">
+              {/* Amber / Burgundy Gradient Progress Bar */}
+              <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-burgundy-950/90 shadow-inner">
                 <div
-                  className="h-full bg-gradient-to-r from-teal-400 to-cyan-400 transition-all duration-300 shadow-[0_0_10px_#22d3ee]"
+                  className="h-full bg-gradient-to-r from-amber-500 to-burgundy-500 transition-all duration-300 shadow-[0_0_10px_rgba(245,158,11,0.5)]"
                   style={{ width: `${pct}%` }}
                 />
               </div>
 
               {/* Digital Stopwatch Timer Badge */}
-              <div className="flex items-center gap-1.5 rounded-xl border border-teal-500/30 bg-teal-950/40 px-3 py-1 font-mono text-xs sm:text-sm font-bold text-teal-300 shadow-inner shrink-0">
+              <div className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-950/40 px-3 py-1 font-mono text-xs sm:text-sm font-bold text-amber-300 shadow-inner shrink-0">
                 <span>⏱</span>
                 <span>00:{String(timeLeft).padStart(2, "0")}</span>
               </div>
             </div>
 
             {/* Main Question Box */}
-            <div className="rounded-2xl border border-slate-800/90 bg-[#0d1629] p-6 shadow-xl">
+            <div className="rounded-2xl border border-burgundy-800/90 bg-[#36000e]/80 p-6 shadow-2xl">
               {/* Category Pill */}
               <div className="mb-3.5">
-                <span className="inline-block rounded-md bg-indigo-600/90 px-3 py-1 text-[11px] font-extrabold tracking-wider text-white uppercase shadow-sm">
-                  {currentQuestionDisplay.topic || "CARDIOLOGY"}
+                <span className="inline-block rounded-md bg-burgundy-800 border border-burgundy-700 px-3 py-1 text-[11px] font-extrabold tracking-wider text-amber-300 uppercase shadow-sm">
+                  {currentQuestionDisplay.topic || room.topic}
                 </span>
               </div>
 
@@ -1450,34 +1655,36 @@ export default function BattleRoom() {
                 {currentQuestionDisplay.text}
               </h1>
 
-              {/* Clinical ECG Strip Component (Matches Image 3) */}
-              <div className="my-5">
-                <ClinicalEcgStrip />
-              </div>
+              {/* Clinical ECG Strip (Rendered specifically for Cardiology cases) */}
+              {isCardioTopic && (
+                <div className="my-5">
+                  <ClinicalEcgStrip />
+                </div>
+              )}
 
               {/* 4 Interactive Option Cards */}
-              <div className="space-y-3">
+              <div className="mt-5 space-y-3">
                 {currentQuestionDisplay.options.map((opt, i) => {
                   const letter = String.fromCharCode(65 + i);
                   const isPicked = selected === opt;
                   const isCorrect = opt === currentQuestionDisplay.correct;
 
                   let cardStyle =
-                    "border-slate-800/80 bg-[#121c33] text-slate-200 hover:border-slate-700 hover:bg-[#16223d]";
-                  let badgeStyle = "bg-slate-800 text-slate-300 font-bold";
+                    "border-burgundy-800/80 bg-burgundy-950/60 text-cream-100 hover:border-burgundy-600 hover:bg-burgundy-900/60";
+                  let badgeStyle = "bg-burgundy-800 text-burgundy-200 font-bold";
 
                   if (revealed && isCorrect) {
                     cardStyle =
-                      "border-emerald-500 bg-emerald-950/50 text-emerald-200 ring-2 ring-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.3)]";
+                      "border-emerald-500 bg-emerald-950/60 text-emerald-200 ring-2 ring-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.3)]";
                     badgeStyle = "bg-emerald-500 text-slate-950 font-bold";
                   } else if (revealed && isPicked && !isCorrect) {
                     cardStyle =
-                      "border-rose-500 bg-rose-950/50 text-rose-200 ring-2 ring-rose-500/50";
+                      "border-rose-500 bg-rose-950/60 text-rose-200 ring-2 ring-rose-500/50";
                     badgeStyle = "bg-rose-500 text-white font-bold";
                   } else if (isPicked) {
                     cardStyle =
-                      "border-emerald-500 bg-emerald-950/40 text-emerald-300 ring-1 ring-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.25)]";
-                    badgeStyle = "bg-emerald-500 text-slate-950 font-bold";
+                      "border-amber-400 bg-amber-950/50 text-amber-200 ring-2 ring-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.25)]";
+                    badgeStyle = "bg-amber-400 text-burgundy-950 font-bold";
                   }
 
                   return (
@@ -1508,33 +1715,33 @@ export default function BattleRoom() {
                     disabled={!selected}
                     className={`flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-black shadow-lg transition active:scale-[0.99] ${
                       selected
-                        ? "bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 shadow-emerald-500/30 cursor-pointer"
-                        : "bg-slate-800 text-slate-500 cursor-not-allowed"
+                        ? "bg-gradient-to-r from-burgundy-600 via-burgundy-500 to-amber-600 hover:from-burgundy-500 hover:to-amber-500 text-white shadow-burgundy-900/50 cursor-pointer"
+                        : "bg-burgundy-950/80 text-burgundy-600 border border-burgundy-900 cursor-not-allowed"
                     }`}
                   >
                     <span>✔</span>
                     <span>Submit Answer</span>
                   </button>
                 ) : (
-                  <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/30 p-3.5 text-center">
+                  <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/40 p-3.5 text-center">
                     <p className="text-xs font-bold text-emerald-400">
-                      ✓ Answer Submitted! Waiting for question timer to resolve...
+                      ✓ Answer Submitted!
                     </p>
                   </div>
                 )}
 
-                <p className="mt-2.5 text-center text-[11px] font-medium text-slate-400">
-                  ⚡ Faster submission awards higher bonus points!
+                <p className="mt-2.5 text-center text-[11px] font-medium text-burgundy-300">
+                  ⚡ Correct answers advance immediately (+2 pts)!
                 </p>
               </div>
 
               {/* Feedback when revealed */}
               {revealed && (
-                <div className="mt-4 rounded-xl border border-teal-500/30 bg-[#091224] p-4">
-                  <p className="text-sm font-bold text-teal-300">
+                <div className="mt-4 rounded-xl border border-amber-500/30 bg-burgundy-950/80 p-4">
+                  <p className="text-sm font-bold text-amber-300">
                     {winner ? `⚡ ${winner} was fastest (+2 pts)` : "⏱ Time Expired"}
                   </p>
-                  <p className="mt-1 text-xs text-slate-300 leading-relaxed">
+                  <p className="mt-1 text-xs text-cream-100 leading-relaxed">
                     Correct Answer: <strong className="font-semibold text-emerald-400">{currentQuestionDisplay.correct}</strong>.{" "}
                     {currentQuestionDisplay.explanation}
                   </p>
@@ -1543,53 +1750,41 @@ export default function BattleRoom() {
             </div>
 
             {/* Bottom Host / Moderator Strip */}
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800/90 bg-[#0d1629] p-4 shadow-lg">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-burgundy-800/90 bg-[#36000e]/80 p-4 shadow-xl">
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-800 text-sm">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-burgundy-800 text-sm">
                   👑
                 </div>
                 <div>
                   <p className="text-xs font-bold text-white">
-                    Host: {room.host || "Dr. Sarah K."}
+                    Host: {room.host || (user?.name ?? "Doctor")}
                   </p>
-                  <p className="text-[11px] text-slate-400">
-                    All 12 players answered (10/12 correct) · Question {qIndex + 1} of {room.questionCount}
+                  <p className="text-[11px] text-burgundy-300">
+                    {room.players.length} {room.players.length === 1 ? "doctor" : "doctors"} in battle · Question {qIndex + 1} of {room.questionCount}
                   </p>
                 </div>
               </div>
 
-              {phase === "waiting" ? (
-                <button
-                  type="button"
-                  onClick={() => startLiveBattleNow()}
-                  className="rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-5 py-2 text-xs font-bold text-slate-950 shadow-md hover:from-emerald-400 hover:to-teal-300 transition"
-                >
-                  ⚔️ Start Battle Now
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => endQuestion(null)}
-                  className="rounded-xl border border-slate-700 bg-slate-800/90 px-4 py-2 text-xs font-bold text-slate-200 hover:border-slate-500 hover:text-white transition"
-                >
-                  Next Question →
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => endQuestion(null)}
+                className="rounded-xl border border-burgundy-700 bg-burgundy-800/90 px-4 py-2 text-xs font-bold text-cream-100 hover:border-burgundy-500 hover:text-white transition"
+              >
+                Skip Question →
+              </button>
             </div>
           </div>
 
-          {/* ====================================================
-              COLUMN 3: RIGHT SIDEBAR (Participants & Live Battle Chat)
-              ==================================================== */}
+          {/* COLUMN 3: RIGHT SIDEBAR (Room Participants & Realtime Chat) */}
           <div className="space-y-4 lg:col-span-3">
             
-            {/* Room Participants Card */}
-            <div className="rounded-2xl border border-slate-800/90 bg-[#0d1629] p-4 shadow-lg">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+            {/* Room Participants Card (Genuine players only, no bots!) */}
+            <div className="rounded-2xl border border-burgundy-800/90 bg-[#36000e]/80 p-4 shadow-xl">
+              <div className="flex items-center justify-between pb-3 border-b border-burgundy-800/80">
                 <div className="flex items-center gap-2">
                   <span className="text-sm">👥</span>
                   <h3 className="font-bold text-xs text-white">
-                    Room Participants ({arenaPlayers.length})
+                    Room Participants ({room.players.length})
                   </h3>
                 </div>
                 <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400">
@@ -1599,110 +1794,42 @@ export default function BattleRoom() {
 
               {/* Participants Avatars List */}
               <div className="mt-3 space-y-2 max-h-56 overflow-y-auto pr-1 scrollbar-none text-xs">
-                {arenaPlayers.map((p, i) => (
+                {room.players.map((p, i) => (
                   <div
                     key={p.name}
-                    className="flex items-center justify-between rounded-xl p-1.5 hover:bg-slate-800/40 transition"
+                    className="flex items-center justify-between rounded-xl p-1.5 hover:bg-burgundy-900/50 transition"
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-blue-700 font-bold text-[11px] text-white">
+                      <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-burgundy-700 to-burgundy-800 font-bold text-[11px] text-white border border-burgundy-600">
                         {p.name.slice(0, 1)}
-                        <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 border border-[#0d1629]" />
+                        <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-500 border border-[#36000e]" />
                       </div>
-                      <span className="truncate font-medium text-slate-300">
-                        {p.name}
+                      <span className="truncate font-medium text-cream-100">
+                        {p.name} {p.name === user.name && "(You)"}
                       </span>
                     </div>
 
                     {i === 0 ? (
-                      <span className="rounded bg-blue-500/20 border border-blue-500/40 px-1.5 py-0.5 text-[9px] font-bold text-blue-300">
+                      <span className="rounded bg-amber-500/20 border border-amber-500/40 px-1.5 py-0.5 text-[9px] font-bold text-amber-300">
                         Host
                       </span>
                     ) : (
-                      <span className="text-[10px] text-slate-500 font-mono">
-                        Ready
+                      <span className="text-[10px] text-emerald-400 font-mono">
+                        Playing
                       </span>
                     )}
                   </div>
                 ))}
               </div>
-
-              <div className="mt-2 text-center">
-                <span className="text-[11px] font-semibold text-slate-400">
-                  + 4 more in lobby
-                </span>
-              </div>
             </div>
 
-            {/* Realtime Battle Chat Card (Matches Image 3) */}
-            <div className="rounded-2xl border border-slate-800/90 bg-[#0d1629] p-4 shadow-lg">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">💬</span>
-                  <h3 className="font-bold text-xs text-white">Battle Chat</h3>
-                </div>
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-
-              {/* Chat Message Stream */}
-              <div className="mt-3 space-y-3 h-64 overflow-y-auto pr-1 scrollbar-none text-xs">
-                {/* Seed messages matching Image 3 */}
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <span className="font-bold text-cyan-400">MedKing</span>
-                    <span>12:21 PM</span>
-                  </div>
-                  <div className="rounded-xl rounded-tl-none bg-[#131f3b] p-2.5 text-slate-200">
-                    Question 4 is tricky 😂
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <span className="font-bold text-indigo-400">Dr. Ade</span>
-                    <span>12:22 PM</span>
-                  </div>
-                  <div className="rounded-xl rounded-tl-none bg-[#131f3b] p-2.5 text-slate-200">
-                    Check the leads carefully!
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <span className="font-bold text-amber-400">Chinedu</span>
-                    <span>12:22 PM</span>
-                  </div>
-                  <div className="rounded-xl rounded-tl-none bg-[#131f3b] p-2.5 text-slate-200">
-                    ST-elevation in III & aVF
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <span className="font-bold text-teal-400">Kemi T</span>
-                    <span>12:23 PM</span>
-                  </div>
-                  <div className="rounded-xl rounded-tl-none bg-[#131f3b] p-2.5 text-slate-200">
-                    Easy 2pts!
-                  </div>
-                </div>
-
-                {/* System notification */}
-                <div className="rounded-lg bg-teal-950/40 border border-teal-500/20 p-2 text-center text-[10px] font-semibold text-teal-300">
-                  ⚡ Kimberly has submitted an answer!
-                </div>
-              </div>
-
-              {/* Live WebSocket In-Room Chat Input */}
-              <div className="mt-3 pt-3 border-t border-slate-800/80">
-                <BattleChat
-                  roomCode={room.code}
-                  currentUserId={user.id}
-                  currentUserName={user.name || "Doctor"}
-                  isHost={room.host === user.name}
-                />
-              </div>
-            </div>
+            {/* Live Realtime Battle Room Chat (Live Supabase Realtime, with Send button) */}
+            <BattleChat
+              roomCode={room.code}
+              currentUserId={user.id}
+              currentUserName={user.name || "Doctor"}
+              isHost={room.host === user.name}
+            />
           </div>
         </div>
       </div>
@@ -1715,33 +1842,33 @@ export default function BattleRoom() {
   if (phase === "results" && room) {
     const sorted = [...room.players].sort((a, b) => b.score - a.score);
     return (
-      <div className="-mx-4 -my-8 min-h-screen bg-[#070e1a] text-slate-100 p-6 flex items-center justify-center">
-        <div className="w-full max-w-xl rounded-3xl border border-slate-800 bg-[#0d1629] p-8 text-center shadow-2xl">
+      <div className="-mx-4 -my-8 min-h-screen bg-gradient-to-b from-burgundy-950 via-[#220008] to-burgundy-950 text-cream-50 p-6 flex items-center justify-center">
+        <div className="w-full max-w-xl rounded-3xl border border-burgundy-800 bg-[#36000e]/95 p-8 text-center shadow-2xl">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-500/20 text-3xl shadow-inner border border-amber-500/30">
             🏆
           </div>
           <h1 className="mt-4 text-2xl font-black text-white">Battle Showdown Complete</h1>
-          <p className="mt-1 text-xs text-slate-400">{room.title}</p>
+          <p className="mt-1 text-xs text-burgundy-300">{room.title}</p>
 
           <div className="mt-5 inline-block rounded-2xl bg-amber-500/10 border border-amber-500/30 px-6 py-3">
             <span className="block text-xs font-semibold text-amber-400">Winner</span>
-            <span className="text-xl font-black text-white">{sorted[0]?.name}</span>
+            <span className="text-xl font-black text-white">{sorted[0]?.name || "Doctor"}</span>
           </div>
 
-          <div className="mt-6 divide-y divide-slate-800/80 text-left text-xs">
+          <div className="mt-6 divide-y divide-burgundy-800/80 text-left text-xs">
             {sorted.map((p, i) => (
               <div key={p.name} className="flex items-center justify-between py-2.5">
-                <span className="font-bold text-slate-400">#{i + 1}</span>
-                <span className="font-semibold text-slate-200">{p.name}</span>
-                <span className="text-slate-400">{p.correct} correct</span>
-                <span className="font-mono font-bold text-cyan-400">{p.score} pts</span>
+                <span className="font-bold text-burgundy-300">#{i + 1}</span>
+                <span className="font-semibold text-cream-100">{p.name}</span>
+                <span className="text-burgundy-300">{p.correct} correct</span>
+                <span className="font-mono font-bold text-amber-400">{p.score} pts</span>
               </div>
             ))}
           </div>
 
           <button
             onClick={() => setPhase("lobby")}
-            className="mt-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 px-8 py-3 text-sm font-bold text-slate-950 shadow-md hover:from-emerald-400 hover:to-teal-300 transition"
+            className="mt-6 rounded-xl bg-gradient-to-r from-burgundy-600 to-amber-600 px-8 py-3 text-sm font-bold text-white shadow-md hover:from-burgundy-500 hover:to-amber-500 transition"
           >
             Back to Battle Room Hub
           </button>

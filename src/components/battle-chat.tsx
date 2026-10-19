@@ -213,21 +213,22 @@ export default function BattleChat({
           {/* Chat Input */}
           <form
             onSubmit={handleSend}
-            className="border-t border-burgundy-100 bg-white p-2.5 flex items-center gap-2"
+            className="border-t border-burgundy-100 bg-white p-2.5 flex items-center gap-2 shrink-0"
           >
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Send message to the 20 doctors in room..."
-              className="flex-1 rounded-xl border border-burgundy-200 bg-cream-50/50 px-3 py-2 text-xs text-burgundy-950 outline-none focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-600"
+              placeholder="Input your answers here"
+              className="flex-1 min-w-0 rounded-xl border border-burgundy-200 bg-cream-50/70 px-3.5 py-2 text-xs text-burgundy-950 outline-none placeholder:text-burgundy-700/50 focus:border-burgundy-600 focus:bg-white focus:ring-1 focus:ring-burgundy-600"
             />
             <button
               type="submit"
               disabled={!input.trim()}
-              className="rounded-xl bg-burgundy-600 px-4 py-2 text-xs font-semibold text-cream-50 transition-colors hover:bg-burgundy-700 disabled:opacity-40"
+              className="shrink-0 flex items-center gap-1.5 rounded-xl bg-burgundy-600 px-4 py-2 text-xs font-bold text-cream-50 shadow-sm transition-all hover:bg-burgundy-700 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              Send
+              <span>Send</span>
+              <span>➤</span>
             </button>
           </form>
         </div>

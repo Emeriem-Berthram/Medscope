@@ -12,3 +12,4 @@ npmout*.err
 tsconfig.tsbuildinfo
 supabase.exe
 .vercel
+.agents

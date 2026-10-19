@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { DEPARTMENTS, EXAMS, QUESTIONS, Question } from "@/lib/questions";
+import { DEPARTMENTS, EXAMS, Question, getQuestionsForTopic } from "@/lib/questions";
 import {
   answerInRoom,
   createRoom,
@@ -13,6 +13,7 @@ import {
   joinRoom,
   saveRoom,
   subscribeRoom,
+  Room,
 } from "@/lib/rooms";
 
 type Phase = "create" | "waiting" | "game" | "results";
@@ -21,18 +22,19 @@ export default function ChallengeRoom() {
   const { user } = useAuth();
   const [phase, setPhase] = useState<Phase>("create");
   const [title, setTitle] = useState("");
-  const [topic, setTopic] = useState("");
-  const [exam, setExam] = useState("");
-  const [faculty, setFaculty] = useState("");
-  const [questionCount, setQuestionCount] = useState(40);
+  const [topic, setTopic] = useState("Cardiology");
+  const [exam, setExam] = useState("NPMCN");
+  const [faculty, setFaculty] = useState("Internal Medicine");
+  const [questionCount, setQuestionCount] = useState(20);
   const [seconds, setSeconds] = useState(40);
   const [code, setCode] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [joinName, setJoinName] = useState("");
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   // game state
-  const [room, setRoom] = useState(getRoom("") as ReturnType<typeof getRoom>);
+  const [room, setRoom] = useState<Room | null>(null);
   const [qIndex, setQIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(40);
   const [selected, setSelected] = useState<string | null>(null);
@@ -43,14 +45,15 @@ export default function ChallengeRoom() {
 
   if (!user) return null;
 
+  // Active player turn
   const activePlayer =
-    currentRoom && currentRoom.players.length === 2
+    currentRoom && currentRoom.players.length >= 2
       ? currentRoom.players[qIndex % 2]
-      : null;
+      : currentRoom?.players[0] ?? null;
 
-  const question = pool[qIndex];
+  const question = pool[qIndex] || pool[0];
 
-  // countdown
+  // countdown timer in live game
   useEffect(() => {
     if (phase !== "game" || revealed) return;
     if (timeLeft <= 0) {
@@ -65,29 +68,37 @@ export default function ChallengeRoom() {
   // sync remote room state over Supabase Realtime
   useEffect(() => {
     if (!code || phase === "results" || phase === "create") return;
-    const unsub = subscribeRoom(code, (r) => setRoom(r));
+    const unsub = subscribeRoom(code, (r) => {
+      setRoom(r);
+      // Ensure pool is built on both devices
+      if (pool.length === 0) {
+        const p = buildPool(r);
+        setPool(p);
+      }
+    });
     return unsub;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [code, phase]);
+  }, [code, phase, pool.length]);
 
-  function buildPool(r: NonNullable<ReturnType<typeof getRoom>>) {
-    const base = QUESTIONS.map((q, i) => ({ ...q, id: i }));
-    const filtered = base.filter(
-      (q) =>
-        (!r.faculty || q.faculty === r.faculty) &&
-        (!r.topic || q.topic === r.topic) &&
-        (!r.exam || q.exam === r.exam)
+  function buildPool(r: Room) {
+    const rawQuestions = getQuestionsForTopic(
+      r.topic,
+      r.questionCount || 20,
+      r.exam,
+      r.faculty
     );
-    return [...filtered].sort(() => Math.random() - 0.5).slice(0, r.questionCount);
+    return rawQuestions.map((q, i) => ({ ...q, id: i }));
   }
 
   function handleTimeout() {
     if (!currentRoom) return;
-    const player = currentRoom.players[qIndex % 2];
-    player.answered += 1;
-    saveRoom(currentRoom);
+    const player = activePlayer || currentRoom.players[0];
+    if (player) {
+      player.answered += 1;
+      saveRoom(currentRoom);
+    }
     setRevealed(true);
-    setTimeout(nextQuestion, 2500);
+    setTimeout(nextQuestion, 2000);
   }
 
   function nextQuestion() {
@@ -102,14 +113,17 @@ export default function ChallengeRoom() {
     setTimeLeft(currentRoom.secondsPerQuestion);
   }
 
+  // The creator gets first access to the room immediately!
   function createChallenge(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!title.trim()) return setError("Give the challenge a title.");
-    if (!faculty) return setError("Choose a department.");
-    if (!topic.trim()) return setError("Enter a topic, e.g. Cardiology.");
-    const newRoom = createRoom({
-      code: generateCode(),
+    if (!title.trim()) return setError("Please enter a challenge title.");
+    if (!faculty) return setError("Please select a department.");
+    if (!topic.trim()) return setError("Please select or enter a topic.");
+
+    const newCode = generateCode();
+    const newRoom: Room = {
+      code: newCode,
       kind: "challenge",
       title: title.trim(),
       topic: topic.trim(),
@@ -117,38 +131,57 @@ export default function ChallengeRoom() {
       faculty,
       questionCount,
       secondsPerQuestion: seconds,
-      host: user?.name ?? "",
-      players: [{ name: user?.name ?? "", score: 0, answered: 0, correct: 0 }],
+      host: user?.name ?? "Doctor",
+      players: [{ name: user?.name ?? "Doctor", score: 0, answered: 0, correct: 0 }],
       status: "waiting",
       visibility: "private",
       currentQuestion: 0,
       createdAt: Date.now(),
-    });
+    };
+
+    createRoom(newRoom);
     setCode(newRoom.code);
     setRoom(newRoom);
-    setPhase("waiting");
+
+    // Build question pool dynamically for this topic
+    const p = buildPool(newRoom);
+    setPool(p);
+    setTimeLeft(newRoom.secondsPerQuestion);
+    setQIndex(0);
+    setSelected(null);
+    setRevealed(false);
+
+    // Creator has immediate access to the room and waits inside for the opponent!
+    setPhase("game");
   }
 
   async function joinChallenge(e: FormEvent) {
     e.preventDefault();
     setError("");
-    if (!joinCode.trim()) return setError("Enter the room code.");
-    if (!joinName.trim()) return setError("Enter your name.");
+    if (!joinCode.trim()) return setError("Please enter the room code.");
+    if (!joinName.trim()) return setError("Please enter your name.");
     await fetchRoom(joinCode);
     const joined = joinRoom(joinCode, joinName.trim());
-    if (!joined) return setError("Room is full or the code is wrong.");
+    if (!joined) return setError("Room is full or the code is invalid.");
     setRoom(joined);
     setCode(joined.code);
-    setPhase("waiting");
+
+    const p = buildPool(joined);
+    setPool(p);
+    setTimeLeft(joined.secondsPerQuestion);
+    setQIndex(joined.currentQuestion || 0);
+    setSelected(null);
+    setRevealed(false);
+
+    // Second user joins directly into the active challenge room!
+    setPhase("game");
   }
 
   function startGame() {
     if (!currentRoom) return;
     const p = buildPool(currentRoom);
     if (p.length === 0) {
-      setError(
-        "No questions in the bank for this topic yet — challenges unlock once questions are uploaded."
-      );
+      setError("No questions found for this topic pool.");
       return;
     }
     setPool(p);
@@ -162,29 +195,46 @@ export default function ChallengeRoom() {
   }
 
   function answer(opt: string) {
-    if (!currentRoom || revealed) return;
+    if (!currentRoom || revealed || !question) return;
     const correct = opt === question.correct;
-    const updated = answerInRoom(currentRoom.code, activePlayer?.name ?? "", correct);
+    const scoringPlayerName =
+      activePlayer?.name || user?.name || currentRoom.players[0]?.name || "Doctor";
+
+    const updated = answerInRoom(currentRoom.code, scoringPlayerName, correct);
     if (updated) setRoom(updated);
+
     setSelected(opt);
     setRevealed(true);
-    setTimeout(nextQuestion, 2500);
+
+    // If correct, advance quickly to next question
+    setTimeout(nextQuestion, correct ? 800 : 2200);
   }
 
-  /* ---------- create form ---------- */
+  const copyRoomCode = () => {
+    if (!code) return;
+    navigator.clipboard?.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  /* ========================================================
+     PHASE 1: CREATE OR JOIN FORM
+     ======================================================== */
   if (phase === "create") {
     return (
       <div className="mx-auto max-w-2xl">
-        <h1 className="text-2xl font-bold text-burgundy-950">Challenge room</h1>
-        <p className="mt-1 text-sm text-burgundy-800/70">
-          Invite one other doctor. You take turns answering the same
-          MCQs — 2 points per correct answer, −0.5 per wrong one.
+        <h1 className="text-2xl font-bold text-burgundy-950 sm:text-3xl">
+          Challenge room
+        </h1>
+        <p className="mt-1 text-sm text-burgundy-800/80">
+          Invite a colleague or peer. You take turns answering the same
+          recall MCQs — 2 points per correct answer, −0.5 per wrong one.
         </p>
 
-        <div className="mt-5 overflow-hidden rounded-2xl border border-burgundy-200/60 shadow-md">
+        <div className="mt-5 overflow-hidden rounded-2xl border border-burgundy-200/80 shadow-md">
           <Image
             src="/challenge-room.jpg"
-            alt="Challenge Room — Two doctors facing off"
+            alt="Challenge Room — Doctors facing off"
             width={1024}
             height={655}
             unoptimized
@@ -193,123 +243,165 @@ export default function ChallengeRoom() {
           />
         </div>
 
+        {error && (
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+            {error}
+          </div>
+        )}
+
+        {/* Create Challenge Form */}
         <form
           onSubmit={createChallenge}
-          className="mt-6 space-y-4 rounded-2xl border border-burgundy-100 bg-cream-50 p-6"
+          className="mt-6 space-y-4 rounded-2xl border border-burgundy-100 bg-cream-50 p-6 shadow-xs"
         >
+          <div className="flex items-center gap-2 pb-2 border-b border-burgundy-200/60">
+            <span className="text-lg">⚔️</span>
+            <h2 className="font-bold text-burgundy-950">Create a New Challenge</h2>
+          </div>
+
           <label className="block">
-            <span className="text-sm font-medium">Challenge title</span>
+            <span className="text-xs font-semibold text-burgundy-900">
+              Challenge title
+            </span>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Cardiology challenge"
-              className="mt-1 w-full rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5 outline-none focus:border-burgundy-500"
+              placeholder="e.g. Cardiology Head-to-Head"
+              className="mt-1 w-full rounded-xl border border-burgundy-200 bg-white px-3.5 py-2.5 text-xs text-burgundy-950 outline-none focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-100"
             />
           </label>
-          <div className="grid gap-4 md:grid-cols-2">
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="text-sm font-medium">Exam</span>
+              <span className="text-xs font-semibold text-burgundy-900">Exam</span>
               <select
                 value={exam}
                 onChange={(e) => setExam(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5"
+                className="mt-1 w-full rounded-xl border border-burgundy-200 bg-white px-3 py-2.5 text-xs text-burgundy-950 outline-none focus:border-burgundy-600"
               >
                 {EXAMS.map((e) => (
-                  <option key={e}>{e}</option>
+                  <option key={e} value={e}>
+                    {e}
+                  </option>
                 ))}
               </select>
             </label>
+
             <label className="block">
-              <span className="text-sm font-medium">Department</span>
+              <span className="text-xs font-semibold text-burgundy-900">
+                Department
+              </span>
               <select
                 value={faculty}
-                onChange={(e) => setFaculty(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5"
+                onChange={(e) => {
+                  setFaculty(e.target.value);
+                  if (e.target.value === "Internal Medicine") setTopic("Cardiology");
+                  else if (e.target.value === "Surgery") setTopic("Surgery");
+                  else if (e.target.value === "Pediatrics") setTopic("Paediatrics");
+                  else if (e.target.value === "Radiology") setTopic("Radiography");
+                }}
+                className="mt-1 w-full rounded-xl border border-burgundy-200 bg-white px-3 py-2.5 text-xs text-burgundy-950 outline-none focus:border-burgundy-600"
               >
-                <option value="">Choose…</option>
                 {DEPARTMENTS.map((f) => (
-                  <option key={f}>{f}</option>
+                  <option key={f} value={f}>
+                    {f}
+                  </option>
                 ))}
               </select>
             </label>
           </div>
+
           <label className="block">
-            <span className="text-sm font-medium">Topic</span>
+            <span className="text-xs font-semibold text-burgundy-900">
+              Topic (Questions will populate for this topic)
+            </span>
             <input
               value={topic}
               onChange={(e) => setTopic(e.target.value)}
-              placeholder="Cardiology"
-              className="mt-1 w-full rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5 outline-none focus:border-burgundy-500"
+              placeholder="e.g. Physiology, Radiography, Cardiology, Pharmacology..."
+              className="mt-1 w-full rounded-xl border border-burgundy-200 bg-white px-3.5 py-2.5 text-xs text-burgundy-950 outline-none focus:border-burgundy-600 focus:ring-1 focus:ring-burgundy-100"
             />
           </label>
-          <div className="grid gap-4 md:grid-cols-2">
+
+          <div className="grid gap-4 sm:grid-cols-2">
             <label className="block">
-              <span className="text-sm font-medium">Questions</span>
-              <input
-                type="number"
-                min={1}
-                max={40}
+              <span className="text-xs font-semibold text-burgundy-900">
+                Number of questions
+              </span>
+              <select
                 value={questionCount}
                 onChange={(e) => setQuestionCount(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5"
-              />
+                className="mt-1 w-full rounded-xl border border-burgundy-200 bg-white px-3 py-2.5 text-xs text-burgundy-950 outline-none focus:border-burgundy-600"
+              >
+                <option value={10}>10 questions</option>
+                <option value={20}>20 questions</option>
+                <option value={30}>30 questions</option>
+                <option value={40}>40 questions</option>
+              </select>
             </label>
+
             <label className="block">
-              <span className="text-sm font-medium">Seconds per question</span>
-              <input
-                type="number"
-                min={5}
-                max={120}
+              <span className="text-xs font-semibold text-burgundy-900">
+                Seconds per question
+              </span>
+              <select
                 value={seconds}
                 onChange={(e) => setSeconds(Number(e.target.value))}
-                className="mt-1 w-full rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5"
-              />
+                className="mt-1 w-full rounded-xl border border-burgundy-200 bg-white px-3 py-2.5 text-xs text-burgundy-950 outline-none focus:border-burgundy-600"
+              >
+                <option value={20}>20 seconds</option>
+                <option value={30}>30 seconds</option>
+                <option value={40}>40 seconds</option>
+                <option value={60}>60 seconds</option>
+              </select>
             </label>
           </div>
-          {error && (
-            <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              {error}
-            </p>
-          )}
+
           <button
             type="submit"
-            className="w-full rounded-full bg-burgundy-600 py-3 font-semibold text-cream-50 hover:bg-burgundy-700"
+            className="w-full rounded-full bg-burgundy-600 py-3 text-sm font-bold text-cream-50 shadow-md hover:bg-burgundy-700 active:scale-95 transition"
           >
-            Create challenge
+            Create & Enter Challenge Room →
           </button>
         </form>
 
+        {/* Join Challenge Form */}
         <form
           onSubmit={joinChallenge}
-          className="mt-6 space-y-4 rounded-2xl border border-burgundy-100 bg-cream-50 p-6"
+          className="mt-6 space-y-4 rounded-2xl border border-burgundy-100 bg-cream-50 p-6 shadow-xs"
         >
-          <h2 className="font-bold text-burgundy-950">Join a challenge</h2>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="flex items-center gap-2 pb-2 border-b border-burgundy-200/60">
+            <span className="text-lg">🤝</span>
+            <h2 className="font-bold text-burgundy-950">Join an Existing Challenge</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
             <input
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value)}
-              placeholder="Room code"
-              className="rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5 uppercase tracking-widest outline-none focus:border-burgundy-500"
+              placeholder="Room code (e.g. 7X9K2P)"
+              className="rounded-xl border border-burgundy-200 bg-white px-3.5 py-2.5 text-xs uppercase tracking-widest font-mono font-bold text-burgundy-950 outline-none focus:border-burgundy-600"
             />
             <input
               value={joinName}
               onChange={(e) => setJoinName(e.target.value)}
               placeholder="Your name"
-              className="rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2.5 outline-none focus:border-burgundy-500"
+              className="rounded-xl border border-burgundy-200 bg-white px-3.5 py-2.5 text-xs text-burgundy-950 outline-none focus:border-burgundy-600"
             />
           </div>
           <button
             type="submit"
-            className="w-full rounded-full border border-burgundy-300 py-2.5 font-semibold text-burgundy-700 hover:bg-burgundy-50"
+            className="w-full rounded-full border border-burgundy-300 py-2.5 text-sm font-semibold text-burgundy-800 hover:bg-burgundy-100 transition"
           >
-            Join challenge
+            Join Challenge →
           </button>
         </form>
       </div>
     );
   }
 
-  /* ---------- waiting ---------- */
+  /* ========================================================
+     PHASE 2: WAITING SCREEN
+     ======================================================== */
   if (phase === "waiting" && currentRoom) {
     return (
       <div className="mx-auto max-w-xl">
@@ -323,91 +415,125 @@ export default function ChallengeRoom() {
           {currentRoom.faculty} · {currentRoom.topic} ·{" "}
           {currentRoom.questionCount} questions · {currentRoom.secondsPerQuestion}s each
         </p>
-        <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-8 text-center">
-          <p className="text-sm font-medium text-burgundy-800/70">Room code</p>
-          <p className="mt-2 text-5xl font-bold tracking-[0.3em] text-burgundy-600">
-            {currentRoom.code}
+
+        <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-8 text-center shadow-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-burgundy-800">Room code</p>
+          <div className="mt-2 flex items-center justify-center gap-3">
+            <span className="text-4xl sm:text-5xl font-black font-mono tracking-widest text-burgundy-600">
+              {currentRoom.code}
+            </span>
+            <button
+              type="button"
+              onClick={copyRoomCode}
+              className="rounded-xl bg-burgundy-100 border border-burgundy-200 px-3 py-1.5 text-xs font-bold text-burgundy-800 hover:bg-burgundy-200 transition"
+            >
+              {copied ? "✓ Copied" : "Copy"}
+            </button>
+          </div>
+          <p className="mt-4 text-xs sm:text-sm text-burgundy-800/80 max-w-md mx-auto">
+            Share this code with your colleague. You can enter the challenge room now and wait inside!
           </p>
-          <p className="mt-4 text-sm text-burgundy-800/70">
-            Send this code to your opponent. The questions appear once
-            they join.
-          </p>
+
           <div className="mt-6 grid grid-cols-2 gap-3">
             {currentRoom.players.map((p, i) => (
               <div
                 key={p.name}
-                className="rounded-xl border border-burgundy-100 bg-cream-50 p-4"
+                className="rounded-xl border border-burgundy-200 bg-white p-4 text-left"
               >
                 <p className="text-xs font-semibold uppercase tracking-wider text-burgundy-600">
                   Player {i + 1}
                 </p>
-                <p className="mt-1 font-bold text-burgundy-950">{p.name}</p>
+                <p className="mt-1 font-bold text-burgundy-950 truncate">{p.name}</p>
+                <span className="text-[10px] text-emerald-600 font-semibold">● Connected</span>
               </div>
             ))}
             {currentRoom.players.length === 1 && (
-              <div className="rounded-xl border border-dashed border-burgundy-200 p-4">
+              <div className="rounded-xl border border-dashed border-burgundy-300 p-4 text-left bg-burgundy-50/50">
                 <p className="text-xs font-semibold uppercase tracking-wider text-burgundy-600">
                   Player 2
                 </p>
-                <p className="mt-1 text-sm text-burgundy-800/60">
+                <p className="mt-1 text-xs text-burgundy-800/70">
                   Waiting for opponent…
                 </p>
               </div>
             )}
           </div>
-          {currentRoom.players.length === 1 && (
-            <button
-              onClick={() => {
-                const joined = joinRoom(currentRoom.code, "Opponent (demo)");
-                if (joined) {
-                  setRoom(joined);
-                }
-              }}
-              className="mt-4 rounded-full bg-burgundy-600 px-6 py-2.5 text-sm font-semibold text-cream-50 hover:bg-burgundy-700"
-            >
-              Simulate opponent joining (demo)
-            </button>
-          )}
-          {currentRoom.players.length === 2 && (
+
+          {/* Direct access button: Creator can enter challenge room immediately */}
+          <div className="mt-6 flex flex-col gap-2">
             <button
               onClick={startGame}
-              className="mt-6 rounded-full bg-burgundy-600 px-8 py-3 font-semibold text-cream-50 hover:bg-burgundy-700"
+              className="rounded-full bg-burgundy-600 px-8 py-3 text-sm font-bold text-cream-50 shadow-md hover:bg-burgundy-700 transition active:scale-95"
             >
-              Start challenge
+              Enter Challenge Room (Wait inside) →
             </button>
-          )}
+            <button
+              onClick={() => setPhase("create")}
+              className="text-xs text-burgundy-700 hover:underline pt-2 font-medium"
+            >
+              ← Back to Challenge Setup
+            </button>
+          </div>
         </section>
       </div>
     );
   }
 
-  /* ---------- game (Arena TV interface from Image 1) ---------- */
+  /* ========================================================
+     PHASE 3: LIVE CHALLENGE ARENA (Burgundy & Cream Palette, No Blue)
+     ======================================================== */
   if (phase === "game" && currentRoom && question) {
     const pct = (timeLeft / currentRoom.secondsPerQuestion) * 100;
-    const player1 = currentRoom.players[0] || { name: "Player 1", score: 0 };
-    const player2 = currentRoom.players[1] || { name: "Player 2", score: 0 };
+    const player1 = currentRoom.players[0] || { name: user.name || "Doctor", score: 0 };
+    const player2 = currentRoom.players[1] || { name: "Waiting for Opponent…", score: 0 };
+    const hasOpponentJoined = currentRoom.players.length >= 2;
 
     return (
       <div className="mx-auto max-w-4xl py-2">
-        {/* TV Outer Monitor Frame */}
-        <div className="relative overflow-hidden rounded-3xl border-4 border-slate-700/80 bg-gradient-to-b from-[#0a192f] via-[#081b33] to-[#040d1a] p-5 shadow-2xl md:p-8">
+        {/* Waiting For Opponent Alert Banner inside room */}
+        {!hasOpponentJoined && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/40 bg-amber-950/40 px-5 py-3 text-xs shadow-md">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-3 w-3 rounded-full bg-amber-400 animate-pulse" />
+              <span className="font-bold text-amber-200">
+                You are in the room! Waiting for Opponent to join:
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-burgundy-200 text-xs">Room Code:</span>
+              <span className="font-mono font-bold tracking-widest text-amber-300 bg-burgundy-950 px-3 py-1 rounded-lg border border-amber-500/40 text-sm">
+                {currentRoom.code}
+              </span>
+              <button
+                type="button"
+                onClick={copyRoomCode}
+                className="rounded-lg bg-burgundy-800 hover:bg-burgundy-700 px-3 py-1 text-xs font-bold text-cream-50 transition border border-burgundy-600 shadow-xs"
+              >
+                {copied ? "✓ Copied" : "Copy Code"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Outer Arena Monitor Frame */}
+        <div className="relative overflow-hidden rounded-3xl border-4 border-burgundy-800/90 bg-gradient-to-b from-burgundy-950 via-[#260009] to-burgundy-950 p-5 shadow-2xl md:p-8 text-cream-50">
           
           {/* Top Scoreboard Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-900/50 pb-5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-burgundy-800/80 pb-5">
             {/* Player 1 Score Box */}
-            <div className="rounded-xl border border-sky-400/30 bg-white/95 px-4 py-2 text-center shadow-md">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                {player1.name}
+            <div className="rounded-xl border border-burgundy-700 bg-burgundy-900/90 px-4 py-2 text-center shadow-md min-w-[110px]">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-burgundy-300">
+                {player1.name} {player1.name === user.name && "(You)"}
               </span>
-              <span className="text-xl font-extrabold text-sky-600 sm:text-2xl">
+              <span className="text-xl font-black font-mono text-amber-400 sm:text-2xl">
                 {player1.score}
               </span>
             </div>
 
             {/* Center Scoreboard Pill */}
-            <div className="flex flex-1 items-center justify-center gap-3 rounded-2xl border border-sky-500/20 bg-slate-800/90 px-4 py-2.5 shadow-inner">
+            <div className="flex flex-1 items-center justify-center gap-3 rounded-2xl border border-burgundy-800 bg-burgundy-950/80 px-4 py-2.5 shadow-inner">
               <div className="text-center">
-                <span className="block text-[9px] font-bold uppercase tracking-wider text-sky-300">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-amber-400">
                   Round
                 </span>
                 <div className="flex gap-1 justify-center mt-0.5">
@@ -416,8 +542,8 @@ export default function ChallengeRoom() {
                       key={r}
                       className={`h-2 w-2 rounded-full ${
                         r <= Math.min(Math.floor(qIndex / 3) + 1, 3)
-                          ? "bg-cyan-400 shadow-[0_0_8px_#22d3ee]"
-                          : "bg-slate-600"
+                          ? "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                          : "bg-burgundy-800"
                       }`}
                     />
                   ))}
@@ -425,7 +551,7 @@ export default function ChallengeRoom() {
               </div>
 
               <div className="text-center">
-                <span className="block text-[9px] font-bold uppercase tracking-wider text-sky-300">
+                <span className="block text-[9px] font-bold uppercase tracking-wider text-amber-400">
                   Question
                 </span>
                 <div className="flex gap-1 justify-center mt-0.5">
@@ -434,46 +560,46 @@ export default function ChallengeRoom() {
                       key={q}
                       className={`h-2 w-2 rounded-full ${
                         q <= (qIndex % 3) + 1
-                          ? "bg-cyan-400 shadow-[0_0_8px_#22d3ee]"
-                          : "bg-slate-600"
+                          ? "bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                          : "bg-burgundy-800"
                       }`}
                     />
                   ))}
                 </div>
               </div>
 
-              {/* Cyan Progress Bar */}
-              <div className="hidden h-3 w-32 overflow-hidden rounded-full bg-slate-700 sm:block">
+              {/* Progress Bar */}
+              <div className="hidden h-3 w-32 overflow-hidden rounded-full bg-burgundy-900 sm:block">
                 <div
-                  className="h-full bg-gradient-to-r from-cyan-400 to-sky-300 transition-all duration-300 shadow-[0_0_12px_#38bdf8]"
+                  className="h-full bg-gradient-to-r from-amber-500 to-burgundy-500 transition-all duration-300 shadow-[0_0_12px_rgba(245,158,11,0.4)]"
                   style={{ width: `${pct}%` }}
                 />
               </div>
 
-              {/* Digital Timer */}
-              <div className="rounded-lg bg-slate-900/80 px-3 py-1 font-mono text-xl font-bold tracking-widest text-cyan-300 sm:text-2xl">
+              {/* Digital Stopwatch Timer */}
+              <div className="rounded-lg bg-burgundy-900/90 border border-amber-500/30 px-3 py-1 font-mono text-xl font-bold tracking-widest text-amber-300 sm:text-2xl">
                 {timeLeft < 10 ? `0${timeLeft}` : timeLeft}s
               </div>
             </div>
 
             {/* Player 2 Score Box */}
-            <div className="rounded-xl border border-sky-400/30 bg-white/95 px-4 py-2 text-center shadow-md">
-              <span className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <div className="rounded-xl border border-burgundy-700 bg-burgundy-900/90 px-4 py-2 text-center shadow-md min-w-[110px]">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-burgundy-300">
                 {player2.name}
               </span>
-              <span className="text-xl font-extrabold text-sky-600 sm:text-2xl">
-                {player2.score}
+              <span className="text-xl font-black font-mono text-amber-400 sm:text-2xl">
+                {hasOpponentJoined ? player2.score : "⏳"}
               </span>
             </div>
           </div>
 
-          {/* Medscope Brand Badge */}
-          <div className="my-4 flex items-center justify-center gap-2">
-            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-400 text-xs font-bold text-slate-950">
-              ✚
+          {/* Turn Indicator */}
+          <div className="my-3 flex items-center justify-between text-xs">
+            <span className="rounded-full bg-burgundy-800/80 border border-burgundy-700 px-3 py-1 font-semibold text-amber-300">
+              Turn: {activePlayer?.name || user.name || "Doctor"}
             </span>
-            <span className="text-xs font-bold tracking-wider text-cyan-300 uppercase">
-              Medscope Challenge Room
+            <span className="text-burgundy-300">
+              Question {qIndex + 1} of {currentRoom.questionCount}
             </span>
           </div>
 
@@ -482,7 +608,7 @@ export default function ChallengeRoom() {
             <p className="text-lg font-bold text-white sm:text-2xl md:text-3xl leading-snug">
               {question.text}
             </p>
-            <p className="mt-2 text-xs text-sky-400/80">
+            <p className="mt-2 text-xs text-amber-300/80">
               Exam Recall: {currentRoom.topic} · {currentRoom.faculty || "Clinical Knowledge"}
             </p>
           </div>
@@ -495,12 +621,12 @@ export default function ChallengeRoom() {
               const isCorrect = opt === question.correct;
 
               let cardStyle =
-                "border-sky-700/60 bg-slate-900/80 text-white hover:border-cyan-400 hover:bg-slate-800/90";
-              let badgeStyle = "bg-sky-600 text-white";
+                "border-burgundy-800/90 bg-burgundy-950/60 text-white hover:border-burgundy-500 hover:bg-burgundy-900/60";
+              let badgeStyle = "bg-burgundy-800 text-cream-100";
 
               if (revealed && isCorrect) {
                 cardStyle =
-                  "border-emerald-400 bg-emerald-950/80 text-emerald-100 ring-2 ring-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.4)]";
+                  "border-emerald-500 bg-emerald-950/80 text-emerald-100 ring-2 ring-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.4)]";
                 badgeStyle = "bg-emerald-500 text-slate-950 font-bold";
               } else if (revealed && isPicked && !isCorrect) {
                 cardStyle =
@@ -508,8 +634,8 @@ export default function ChallengeRoom() {
                 badgeStyle = "bg-rose-500 text-white";
               } else if (isPicked) {
                 cardStyle =
-                  "border-cyan-400 bg-cyan-400 text-slate-950 font-bold ring-2 ring-cyan-300 shadow-[0_0_25px_rgba(34,211,238,0.6)]";
-                badgeStyle = "bg-white text-slate-950 font-bold";
+                  "border-amber-400 bg-amber-950/60 text-amber-200 font-bold ring-2 ring-amber-400 shadow-[0_0_20px_rgba(245,158,11,0.4)]";
+                badgeStyle = "bg-amber-400 text-burgundy-950 font-bold";
               }
 
               return (
@@ -535,31 +661,43 @@ export default function ChallengeRoom() {
 
           {/* Revealed Feedback */}
           {revealed && (
-            <div className="mt-6 rounded-2xl border border-sky-400/40 bg-slate-900/90 p-4 text-center">
-              <p className="text-base font-bold text-cyan-300">
+            <div className="mt-6 rounded-2xl border border-amber-500/40 bg-burgundy-950/90 p-4 text-center">
+              <p className="text-base font-bold text-amber-300">
                 {selected === question.correct
                   ? "✓ Correct — +2 points awarded!"
                   : timeLeft <= 0
                     ? "⏱ Time Up"
                     : `✗ Incorrect (−0.5). Correct answer: ${question.correct}`}
               </p>
-              <p className="mt-1 text-xs text-slate-300 max-w-xl mx-auto">
+              <p className="mt-1 text-xs text-cream-100 max-w-xl mx-auto leading-relaxed">
                 {question.explanation}
               </p>
             </div>
           )}
 
-          {/* Bottom Monitor Stand Feet */}
-          <div className="mt-6 flex justify-center gap-12">
-            <div className="h-4 w-24 rounded-t-lg bg-slate-800 border-t border-slate-600" />
-            <div className="h-4 w-24 rounded-t-lg bg-slate-800 border-t border-slate-600" />
+          {/* Bottom Controls */}
+          <div className="mt-8 flex items-center justify-between border-t border-burgundy-800/80 pt-4 text-xs">
+            <button
+              onClick={() => setPhase("create")}
+              className="text-burgundy-300 hover:text-white transition font-medium"
+            >
+              ← Leave Room
+            </button>
+            <button
+              onClick={nextQuestion}
+              className="rounded-lg bg-burgundy-800/80 hover:bg-burgundy-700 px-3.5 py-1.5 font-bold text-cream-100 transition border border-burgundy-700"
+            >
+              Next Question →
+            </button>
           </div>
         </div>
       </div>
     );
   }
 
-  /* ---------- results ---------- */
+  /* ========================================================
+     PHASE 4: RESULTS PHASE
+     ======================================================== */
   if (phase === "results" && currentRoom) {
     const sorted = [...currentRoom.players].sort((a, b) => b.score - a.score);
     return (
@@ -567,26 +705,29 @@ export default function ChallengeRoom() {
         <h1 className="text-2xl font-bold text-burgundy-950">
           Challenge complete
         </h1>
-        <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6 text-center">
-          <p className="text-sm font-medium text-burgundy-800/70">Winner</p>
-          <p className="mt-1 text-3xl font-bold text-burgundy-600">
-            {sorted[0]?.name}
+        <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6 text-center shadow-md">
+          <p className="text-xs font-bold uppercase tracking-wider text-burgundy-800/80">Winner</p>
+          <p className="mt-1 text-3xl font-black text-burgundy-600">
+            {sorted[0]?.name || "Doctor"}
           </p>
           <div className="mt-6 grid gap-3">
             {sorted.map((p) => (
               <div
                 key={p.name}
-                className="flex items-center justify-between rounded-xl border border-burgundy-100 bg-cream-50 px-4 py-3"
+                className="flex items-center justify-between rounded-xl border border-burgundy-200 bg-white px-4 py-3 shadow-xs"
               >
                 <span className="font-semibold text-burgundy-950">{p.name}</span>
-                <span className="text-sm text-burgundy-800/70">
+                <span className="text-sm text-burgundy-800/80">
                   {p.correct}/{p.answered} correct
                 </span>
-                <span className="text-xl font-bold text-burgundy-600">{p.score}</span>
+                <span className="text-xl font-bold font-mono text-burgundy-600">
+                  {p.score} pts
+                </span>
               </div>
             ))}
           </div>
         </section>
+
         <h2 className="mt-8 font-bold text-burgundy-950">Review every question</h2>
         <div className="mt-4 space-y-3">
           {pool.map((q, i) => (
@@ -597,20 +738,21 @@ export default function ChallengeRoom() {
               <p className="text-sm font-semibold text-burgundy-950">
                 {i + 1}. {q.text}
               </p>
-              <p className="mt-1 text-sm text-burgundy-700">
+              <p className="mt-1 text-sm font-semibold text-burgundy-700">
                 Answer: {q.correct}
               </p>
-              <p className="mt-1 text-xs text-burgundy-900/70">{q.explanation}</p>
+              <p className="mt-1 text-xs text-burgundy-900/80 leading-relaxed">{q.explanation}</p>
             </div>
           ))}
         </div>
+
         <button
           onClick={() => {
             setPhase("create");
-            setRoom(null as unknown as ReturnType<typeof getRoom>);
+            setRoom(null);
             setError("");
           }}
-          className="mt-8 rounded-full bg-burgundy-600 px-8 py-3 font-semibold text-cream-50 hover:bg-burgundy-700"
+          className="mt-8 rounded-full bg-burgundy-600 px-8 py-3 font-semibold text-cream-50 shadow-md hover:bg-burgundy-700 transition"
         >
           New challenge
         </button>

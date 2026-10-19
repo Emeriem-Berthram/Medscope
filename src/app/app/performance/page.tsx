@@ -25,7 +25,7 @@ export default function Performance() {
         session.
       </p>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <div className="rounded-2xl bg-burgundy-500 p-5 text-white">
           <p className="text-3xl font-bold">{acc}%</p>
           <p className="mt-1 text-xs">Overall accuracy</p>

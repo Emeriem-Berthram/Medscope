@@ -28,8 +28,8 @@ export default function Leaderboard() {
         </div>
       )}
 
-      <div className="mt-6 overflow-hidden rounded-2xl border border-burgundy-100 bg-cream-50">
-        <table className="w-full text-sm">
+      <div className="mt-6 overflow-x-auto rounded-2xl border border-burgundy-100 bg-cream-50">
+        <table className="w-full min-w-[500px] text-sm">
           <thead>
             <tr className="border-b border-burgundy-100 bg-burgundy-50/60 text-left text-xs font-semibold uppercase tracking-wider text-burgundy-700">
               <th className="px-4 py-3">Rank</th>

@@ -9,7 +9,7 @@ import { DEPARTMENTS, EXAMS } from "@/lib/questions";
 import { listBattleRooms, fetchPublicBattles, Room } from "@/lib/rooms";
 import SubscribeModal from "@/components/subscribe-modal";
 import AutomatedOnboarding from "@/components/automated-onboarding";
-import { PLANS } from "@/lib/paystack";
+import { PLANS, PLANS_BY_CURRENCY, Currency } from "@/lib/paystack";
 
 export default function Dashboard() {
   const { user, setProfile } = useAuth();
@@ -29,9 +29,16 @@ export default function Dashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-burgundy-950">
-        {user.name ? `${user.name.split(" ")[0]}'s dashboard` : "Dashboard"}
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold text-burgundy-950 sm:text-3xl">
+          Dashboard
+        </h1>
+        {user.name && (
+          <span className="rounded-full bg-burgundy-100/80 px-3 py-1 text-xs font-semibold text-burgundy-800">
+            Dr. {user.name}
+          </span>
+        )}
+      </div>
       <p className="mt-1 text-sm text-burgundy-800/70">
         {user.exam && user.faculty
           ? `${user.exam} · ${user.faculty} · ${user.plan} plan`
@@ -44,7 +51,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             <div className="rounded-2xl bg-burgundy-500 p-5 text-white">
               <p className="text-3xl font-bold">{acc}%</p>
               <p className="mt-1 text-xs">Accuracy</p>
@@ -100,38 +107,62 @@ export default function Dashboard() {
       </div>
 
       <section className="mt-6 rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
-        <h2 className="font-bold text-burgundy-950">
-          Invite a colleague
-        </h2>
-        <p className="mt-2 text-sm text-burgundy-800/70">
-          Share your personal invite link — when a doctor signs up
-          with it, you both get 5 extra free questions.
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <code className="rounded-lg border border-burgundy-200 bg-cream-50 px-3 py-2 text-sm font-bold tracking-wider text-burgundy-700">
-            {user.inviteCode}
-          </code>
-          <button
-            onClick={() => {
-              navigator.clipboard
-                ?.writeText(
-                  `https://medscope-app.vercel.app/signup?ref=${user.inviteCode}`
-                )
-                .catch(() => {});
-            }}
-            className="rounded-full bg-burgundy-600 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-burgundy-700"
-          >
-            Copy invite link
-          </button>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-bold text-burgundy-950 sm:text-lg">
+            Invite a colleague & Earn Rewards
+          </h2>
+          {user.plan === "free" ? (
+            <span className="rounded-full bg-burgundy-100/90 px-3 py-1 text-xs font-bold text-burgundy-800 border border-burgundy-200">
+              🔒 Subscribed Members Only
+            </span>
+          ) : (
+            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+              Active Referral Partner
+            </span>
+          )}
         </div>
-        <p className="mt-3 break-all text-xs text-burgundy-800/60">
-          https://medscope-app.vercel.app/signup?ref={user.inviteCode}
-        </p>
+
+        {user.plan === "free" ? (
+          <div className="mt-3">
+            <p className="text-sm text-burgundy-800/80 leading-relaxed">
+              Personalized referral codes and invite links are reserved exclusively for Medscope subscribed doctors. Upgrade to Monthly or Annual to generate your personal referral code and earn free extension credits for every colleague who joins!
+            </p>
+            <div className="mt-4">
+              <SubscriptionButton label="Upgrade to Unlock Referral Code →" />
+            </div>
+          </div>
+        ) : (
+          <>
+            <p className="mt-2 text-sm text-burgundy-800/70">
+              Share your personal invite link — when a doctor signs up with it, you both get 5 extra free questions and bonus extension days.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <code className="rounded-lg border border-burgundy-200 bg-white px-3 py-2 text-sm font-bold tracking-wider text-burgundy-700">
+                {user.inviteCode}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard
+                    ?.writeText(
+                      `https://medscope-app.vercel.app/signup?ref=${user.inviteCode}`
+                    )
+                    .catch(() => {});
+                }}
+                className="rounded-full bg-burgundy-600 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-burgundy-700 transition active:scale-95 shadow-sm"
+              >
+                Copy invite link
+              </button>
+            </div>
+            <p className="mt-3 break-all text-xs text-burgundy-800/60">
+              https://medscope-app.vercel.app/signup?ref={user.inviteCode}
+            </p>
+          </>
+        )}
       </section>
 
       {/* Challenge Section with Reference Picture */}
       <section className="mt-8 overflow-hidden rounded-3xl border border-burgundy-200/90 bg-gradient-to-br from-burgundy-950 via-burgundy-900 to-burgundy-950 p-6 text-cream-50 shadow-xl sm:p-8">
-        <div className="grid items-center gap-6 md:grid-cols-2">
+        <div className="grid items-center gap-6 lg:grid-cols-2">
           <div>
             <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-burgundy-200">
               <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -310,15 +341,15 @@ export default function Dashboard() {
   );
 }
 
-function SubscriptionButton() {
+function SubscriptionButton({ label = "Subscribe now" }: { label?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
       <button
         onClick={() => setOpen(true)}
-        className="mt-4 rounded-full bg-burgundy-600 px-5 py-2 text-sm font-semibold text-cream-50 hover:bg-burgundy-700"
+        className="rounded-full bg-burgundy-600 px-5 py-2.5 text-sm font-semibold text-cream-50 hover:bg-burgundy-700 shadow-sm transition active:scale-95"
       >
-        Subscribe now
+        {label}
       </button>
       <SubscribeModal open={open} onClose={() => setOpen(false)} />
     </>
@@ -327,21 +358,51 @@ function SubscriptionButton() {
 
 function SubscriptionCard() {
   const [open, setOpen] = useState(false);
+  const [currency, setCurrency] = useState<Currency>("NGN");
+  const plans = PLANS_BY_CURRENCY[currency];
+
   return (
     <>
       <section className="rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
-        <h2 className="font-bold text-burgundy-950">
-          Subscribe for the full bank
-        </h2>
-        <p className="mt-1 text-sm text-burgundy-800/70">
-          Every question, every mock, offline packs.
-        </p>
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <h2 className="font-bold text-burgundy-950">
+              Subscribe for the full bank
+            </h2>
+            <p className="mt-0.5 text-xs text-burgundy-800/70">
+              Every recall, every mock, offline packs.
+            </p>
+          </div>
+          <div className="flex items-center rounded-xl border border-burgundy-200 bg-white p-1 text-xs">
+            <button
+              onClick={() => setCurrency("NGN")}
+              className={`rounded-lg px-2.5 py-1 font-bold ${
+                currency === "NGN"
+                  ? "bg-burgundy-600 text-white"
+                  : "text-burgundy-800 hover:bg-burgundy-50"
+              }`}
+            >
+              ₦ NGN
+            </button>
+            <button
+              onClick={() => setCurrency("USD")}
+              className={`rounded-lg px-2.5 py-1 font-bold ${
+                currency === "USD"
+                  ? "bg-burgundy-600 text-white"
+                  : "text-burgundy-800 hover:bg-burgundy-50"
+              }`}
+            >
+              $ USD
+            </button>
+          </div>
+        </div>
+
         <div className="mt-4 space-y-3">
-          {PLANS.map((plan) => (
+          {plans.map((plan) => (
             <button
               key={plan.id}
               onClick={() => setOpen(true)}
-              className="flex w-full items-center justify-between rounded-xl border border-burgundy-100 bg-cream-50 px-4 py-3 text-left hover:border-burgundy-400"
+              className="flex w-full items-center justify-between rounded-xl border border-burgundy-100 bg-white px-4 py-3 text-left hover:border-burgundy-400 hover:bg-burgundy-50/50 transition"
             >
               <div>
                 <p className="font-semibold text-burgundy-950">
@@ -351,8 +412,8 @@ function SubscriptionCard() {
                   {plan.blurb}
                 </p>
               </div>
-              <p className="ml-3 font-bold text-burgundy-600">
-                {plan.price}
+              <p className="ml-3 font-bold text-burgundy-600 shrink-0">
+                {plan.price}{plan.period}
               </p>
             </button>
           ))}

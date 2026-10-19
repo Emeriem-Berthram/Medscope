@@ -305,22 +305,58 @@ create policy "Users can read own subscriptions" on public.subscriptions for sel
 -- ==============================================================================
 do $$
 begin
+  -- Only add if not already in publication
   if not exists (
     select 1 from pg_publication_tables 
-    where pubname = 'supabase_realtime' and tablename = 'rooms'
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'rooms'
   ) then
-    alter publication supabase_realtime add table public.rooms;
+    begin
+      alter publication supabase_realtime add table public.rooms;
+    exception when others then null;
+    end;
   end if;
+
   if not exists (
     select 1 from pg_publication_tables 
-    where pubname = 'supabase_realtime' and tablename = 'room_players'
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'room_players'
   ) then
-    alter publication supabase_realtime add table public.room_players;
+    begin
+      alter publication supabase_realtime add table public.room_players;
+    exception when others then null;
+    end;
   end if;
+
   if not exists (
     select 1 from pg_publication_tables 
-    where pubname = 'supabase_realtime' and tablename = 'room_messages'
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'room_messages'
   ) then
-    alter publication supabase_realtime add table public.room_messages;
+    begin
+      alter publication supabase_realtime add table public.room_messages;
+    exception when others then null;
+    end;
   end if;
+exception
+  when others then null;
 end $$;
+
+-- ==============================================================================
+-- 15. AUTO-CONFIRM REGISTERED USERS (Enables immediate login without SMTP delays)
+-- ==============================================================================
+-- Auto-confirm all existing registered users so they can log in immediately
+update auth.users
+set email_confirmed_at = coalesce(email_confirmed_at, now())
+where email_confirmed_at is null;
+
+-- Trigger to automatically confirm future candidate signups
+create or replace function public.auto_confirm_new_candidates()
+returns trigger as $$
+begin
+  new.email_confirmed_at = coalesce(new.email_confirmed_at, now());
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists trg_auto_confirm_new_candidates on auth.users;
+create trigger trg_auto_confirm_new_candidates
+  before insert on auth.users
+  for each row execute function public.auto_confirm_new_candidates();

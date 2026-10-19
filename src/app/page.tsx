@@ -1,5 +1,5 @@
 import Image from "next/image";
-import PricingButton from "@/components/pricing-button";
+import PricingSection from "@/components/pricing-section";
 
 const features = [
   {
@@ -365,46 +365,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="text-3xl font-bold">Simple pricing</h2>
-        <p className="mt-3 max-w-2xl text-burgundy-800/80">
-          Start free. Subscribe to the college and faculty you&apos;re actually sitting —
-          you never pay for a bank you won&apos;t open.
-        </p>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {[
-            {
-              name: "Free",
-              price: "₦0",
-              desc: "10 questions a month, Free Resources library, no card needed.",
-              plan: "free" as const,
-              cta: "Create free account",
-            },
-            {
-              name: "Monthly",
-              price: "₦12,000/mo",
-              desc: "Full bank for your college & faculty, timed mocks, analytics, offline packs.",
-              plan: "monthly" as const,
-              cta: "Subscribe",
-            },
-            {
-              name: "Annual",
-              price: "₦10,000/yr",
-              desc: "Everything in Monthly — save ₦134,000 a year, priority support and exam-season updates.",
-              plan: "annual" as const,
-              cta: "Subscribe — save ₦134,000",
-            },
-          ].map((p) => (
-            <div key={p.name} className="flex flex-col rounded-2xl border border-burgundy-100 bg-cream-50 p-6">
-              <h3 className="font-bold text-burgundy-700">{p.name}</h3>
-              <p className="mt-2 text-3xl font-bold">{p.price}</p>
-              <p className="mt-3 flex-1 text-sm text-burgundy-900/70">{p.desc}</p>
-              <PricingButton plan={p.plan} label={p.cta} />
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Pricing with Multi-Currency Support (NGN & USD) */}
+      <PricingSection />
 
       {/* Reviews */}
       <section id="reviews" className="bg-burgundy-50/50 py-16">
