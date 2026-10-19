@@ -144,32 +144,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Restore an existing session on load.
-    supabase.auth
-      .getSession()
-      .then(async ({ data: { session } }) => {
-        if (session?.user) {
-          const u = await syncUserProfile(session.user);
-          setUser(u);
-        }
-      })
-      .catch(() => {})
-      .finally(() => {
-        setLoading(false);
-      });
+    // 1. Instant session restore from Supabase client
+    const restoreSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-    // Keep the session in sync (sign-in, sign-out, token refresh,
-    // and the email-verification link completing sign-up).
+        if (session?.user) {
+          // Immediately set user synchronously to avoid any redirect flicker
+          const fastUser = fromAuthUserFast(session.user);
+          setUser(fastUser);
+          setLoading(false);
+
+          // Deep sync database profiles in background
+          syncUserProfile(session.user)
+            .then((fresh) => {
+              setUser(fresh);
+            })
+            .catch(() => {});
+          return;
+        }
+      } catch {
+        // Fallback
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    restoreSession();
+
+    // 2. Keep the session in sync (sign-in, sign-out, token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        const u = await syncUserProfile(session.user);
-        setUser(u);
+      if (
+        (event === "SIGNED_IN" ||
+          event === "TOKEN_REFRESHED" ||
+          event === "INITIAL_SESSION") &&
+        session?.user
+      ) {
+        const fast = fromAuthUserFast(session.user);
+        setUser(fast);
+        setLoading(false);
+        syncUserProfile(session.user)
+          .then((fresh) => {
+            setUser(fresh);
+          })
+          .catch(() => {});
       } else if (event === "SIGNED_OUT") {
         setUser(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -200,9 +226,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(error.message);
     }
     if (data?.user) {
-      const u = await syncUserProfile(data.user);
-      setUser(u);
-      return u;
+      const fast = fromAuthUserFast(data.user);
+      setUser(fast);
+      // Background sync
+      syncUserProfile(data.user)
+        .then((fresh) => setUser(fresh))
+        .catch(() => {});
+      return fast;
     }
   };
 
@@ -221,13 +251,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .select("id, email")
         .eq("email", cleanEmail)
         .maybeSingle();
+
       if (existingProfile) {
+        // If already registered, attempt to log them in directly with their password!
+        try {
+          const { data: signInData } = await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password,
+          });
+          if (signInData?.user) {
+            const fast = fromAuthUserFast(signInData.user);
+            setUser(fast);
+            syncUserProfile(signInData.user)
+              .then((fresh) => setUser(fresh))
+              .catch(() => {});
+            return "signed-in";
+          }
+        } catch {
+          // If password doesn't match, return already-registered
+        }
         return "already-registered";
       }
     } catch {
       // Continue to Supabase signUp
     }
 
+    // 2. Perform Supabase signUp
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
@@ -244,6 +293,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         msg.includes("already exists") ||
         msg.includes("user_already_exists")
       ) {
+        // Attempt sign in with password
+        try {
+          const { data: signInData } = await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password,
+          });
+          if (signInData?.user) {
+            const fast = fromAuthUserFast(signInData.user);
+            setUser(fast);
+            return "signed-in";
+          }
+        } catch {
+          // Password didn't match
+        }
         return "already-registered";
       }
       throw new Error(error.message);
@@ -255,20 +318,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Array.isArray(data.user.identities) &&
       data.user.identities.length === 0
     ) {
+      // User already exists in auth.users, try direct login
+      try {
+        const { data: signInData } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
+        if (signInData?.user) {
+          const fast = fromAuthUserFast(signInData.user);
+          setUser(fast);
+          return "signed-in";
+        }
+      } catch {
+        // Fallback
+      }
       return "already-registered";
     }
 
+    // 3. If signed up but no active session, attempt immediate login
     if (data.user && !data.session) {
+      try {
+        const { data: signInData } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password,
+        });
+        if (signInData?.user) {
+          const fast = fromAuthUserFast(signInData.user);
+          setUser(fast);
+          syncUserProfile(signInData.user)
+            .then((fresh) => setUser(fresh))
+            .catch(() => {});
+          return "signed-in";
+        }
+      } catch {
+        // Email requires confirmation link
+      }
       return "verification-required";
     }
 
     if (data.user) {
-      const u = await syncUserProfile(data.user);
-      setUser(u);
+      const fast = fromAuthUserFast(data.user);
+      setUser(fast);
+      syncUserProfile(data.user)
+        .then((fresh) => setUser(fresh))
+        .catch(() => {});
     }
 
     return "signed-in";
   };
+
 
   const signOut = async () => {
     setUser(null);

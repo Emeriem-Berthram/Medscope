@@ -360,3 +360,30 @@ drop trigger if exists trg_auto_confirm_new_candidates on auth.users;
 create trigger trg_auto_confirm_new_candidates
   before insert on auth.users
   for each row execute function public.auto_confirm_new_candidates();
+
+-- ==============================================================================
+-- 16. INSTANT CANDIDATE PASSWORD RESET & AUTO-CONFIRM RPC
+-- Allows candidates to reset forgotten passwords and log in immediately
+-- ==============================================================================
+create or replace function public.reset_candidate_password(candidate_email text, new_password text)
+returns boolean as $$
+declare
+  target_id uuid;
+begin
+  select id into target_id from auth.users where lower(email) = lower(trim(candidate_email));
+  if target_id is null then
+    return false;
+  end if;
+
+  update auth.users
+  set encrypted_password = crypt(new_password, gen_salt('bf')),
+      email_confirmed_at = coalesce(email_confirmed_at, now()),
+      updated_at = now()
+  where id = target_id;
+
+  return true;
+end;
+$$ language plpgsql security definer;
+
+grant execute on function public.reset_candidate_password(text, text) to anon, authenticated;
+

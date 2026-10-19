@@ -101,6 +101,29 @@ export default function AuthForm({ mode }: { mode: "signin" | "signup" }) {
 
     try {
       if (resetMode) {
+        // First try the instant candidate password reset RPC if a new password is provided
+        if (password.trim().length >= 8) {
+          try {
+            const { data: rpcSuccess } = await supabase.rpc(
+              "reset_candidate_password",
+              {
+                candidate_email: cleanEmail,
+                new_password: password.trim(),
+              }
+            );
+            if (rpcSuccess) {
+              setInfoMessage(
+                "✓ Password updated successfully! Signing you into your dashboard..."
+              );
+              await signIn(cleanEmail, password.trim());
+              window.location.href = "/app";
+              return;
+            }
+          } catch {
+            // Fallback to email reset link
+          }
+        }
+
         const { error: resetError } =
           await supabase.auth.resetPasswordForEmail(cleanEmail, {
             redirectTo: getAuthRedirectUrl("/login"),
@@ -276,7 +299,38 @@ export default function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         />
       </label>
 
-      {!resetMode && (
+      {resetMode ? (
+        <div>
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium text-burgundy-900">
+              New Password (Optional)
+            </span>
+            <span className="text-[11px] text-burgundy-600 font-semibold">
+              Min 8 characters
+            </span>
+          </div>
+          <div className="relative mt-1">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-xl border border-burgundy-200 px-3.5 py-2.5 pr-10 outline-none transition focus:border-burgundy-500 focus:ring-2 focus:ring-burgundy-100"
+              placeholder="Enter new password to reset directly"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-burgundy-400 hover:text-burgundy-700 p-1 text-sm"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
+          <p className="mt-1 text-[11px] text-burgundy-800/70">
+            Enter a new password (8+ chars) to update immediately, or leave blank to receive an email reset link.
+          </p>
+        </div>
+      ) : (
         <div>
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-burgundy-900">
@@ -461,6 +515,18 @@ export default function AuthForm({ mode }: { mode: "signin" | "signup" }) {
               {resending ? "Sending..." : "Resend Verification Email →"}
             </button>
           )}
+          {mode === "signin" && !resetMode && (
+            <button
+              type="button"
+              onClick={() => {
+                setResetMode(true);
+                setError("");
+              }}
+              className="mt-1 block text-left text-xs font-semibold text-burgundy-700 underline hover:text-burgundy-900"
+            >
+              Forgotten or lost password? Click here to reset →
+            </button>
+          )}
         </div>
       )}
 
@@ -472,7 +538,9 @@ export default function AuthForm({ mode }: { mode: "signin" | "signup" }) {
         {busy
           ? "Please wait…"
           : resetMode
-          ? "Send reset link"
+          ? password.trim().length >= 8
+            ? "Reset Password & Sign In"
+            : "Send reset link"
           : mode === "signup"
           ? "Create free account"
           : "Sign in"}
