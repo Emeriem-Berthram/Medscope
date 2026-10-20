@@ -347,15 +347,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Main Layout Grid: When on Radiographs, sidebar is excluded for centered full-width view; on other pages, side-by-side desktop view */}
+      {/* Main Layout Grid: When on Radiographs or Lab Slides, sidebar is excluded for centered full-width view; on other pages, side-by-side desktop view */}
       <div
         className={`mx-auto max-w-7xl px-3 sm:px-6 py-4 sm:py-8 ${
-          pathname.startsWith("/app/radiographs")
+          pathname.startsWith("/app/radiographs") || pathname.startsWith("/app/lab-slides")
             ? "w-full"
             : "grid gap-6 lg:gap-8 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr] items-start"
         }`}
       >
-        {!pathname.startsWith("/app/radiographs") && (
+        {!(pathname.startsWith("/app/radiographs") || pathname.startsWith("/app/lab-slides")) && (
           <aside className="hidden space-y-3 md:block md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:flex md:flex-col">
             <nav aria-label="Desktop Navigation" className="space-y-1 overflow-y-auto pr-1 no-scrollbar flex-1">
               {NAV.map((item) => {
