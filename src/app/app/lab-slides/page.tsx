@@ -1078,185 +1078,76 @@ export default function LabSlidesPage() {
         <span>{toastMessage}</span>
       </div>
 
-      {/* ==================== 1. TOP HEADER & PATHOLOGIST PROFILE BAR ==================== */}
-      <header className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        {/* Medscope Lab Branding */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/app"
-            className="w-11 h-11 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200 text-xl font-bold hover:scale-105 transition"
-            title="Return to Dashboard"
-          >
-            🔬
-          </Link>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight font-serif">Medscope</h1>
-              <span className="text-[10px] uppercase px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">
-                Pathology LIS
+      {/* ==================== HERO BANNER (Battle Room Gradient) ==================== */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-burgundy-950 via-burgundy-900 to-burgundy-850 text-cream-50 p-6 sm:p-8 shadow-xl border border-burgundy-800/80">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-burgundy-600/20 blur-3xl" />
+
+        <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2.5 mb-2">
+              <span className="inline-block text-[10px] tracking-widest uppercase font-extrabold text-amber-200 bg-white/10 px-3 py-1 rounded-full backdrop-blur-xs border border-white/10">
+                MEDSCOPE WHOLE SLIDE IMAGING (WSI) SUITE
+              </span>
+              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
+                WSI Stage Ready
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-medium tracking-wide">
-              Digital Microscopy • Cytology • Histopathology
+            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-white font-serif">
+              Precision cellular diagnosis.<br className="hidden sm:inline" /> From smear morphology to tissue architecture.
+            </h1>
+            <p className="text-xs sm:text-sm text-cream-100/90 mt-2 font-normal leading-relaxed">
+              Seamlessly transition between Wright-Giemsa peripheral blood smears and Hematoxylin &amp; Eosin (H&amp;E) biopsy specimens. Adjust optical objectives up to 100x Oil Immersion, perform differential cell counts, and sign out verified diagnostic impressions.
             </p>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={scrollToViewer}
+                className="px-5 py-2.5 bg-burgundy-600 hover:bg-burgundy-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-2"
+              >
+                <span>Launch Virtual Stage</span>
+                <span>↓</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setModalMode("switch");
+                  setDoctorModalOpen(true);
+                }}
+                className="px-4 py-2.5 bg-white/15 hover:bg-white/20 text-cream-50 rounded-xl text-xs font-semibold backdrop-blur-xs transition flex items-center gap-1.5 border border-white/15"
+              >
+                <span>👩‍⚕️ Switch Clinician ({doctor.title} {doctor.fullName})</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Center Greeting & Lab Bench Info */}
-        <div className="hidden md:block text-left">
-          <h2 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight flex items-center gap-1.5 font-serif">
-            Good morning, {doctor.title} {doctor.fullName}! 👋
-          </h2>
-          <p className="text-xs text-slate-400 font-medium">Ready to review today&apos;s haematology & histology slide runs?</p>
-        </div>
-
-        {/* Right Action Items */}
-        <div className="flex items-center gap-3 ml-auto sm:ml-0">
-          <Link
-            href="/app"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 hover:text-indigo-600 transition border border-slate-200"
-          >
-            <span>← Dashboard</span>
-          </Link>
-
-          {/* Quick Jump */}
-          <a
-            href="#microscopeSection"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 bg-slate-50 hover:bg-slate-100 hover:text-indigo-600 transition border border-slate-200"
-          >
-            <span>Virtual Stage</span>
-            <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md font-bold">
-              WSI Ready
-            </span>
-          </a>
-
-          {/* Urgent Alert Bell */}
-          <button
-            type="button"
-            onClick={() => showToast("2 STAT Critical Panic Values: Blast crisis & suspicious margin sign-out", "⚠️")}
-            className="relative w-10 h-10 rounded-xl border border-slate-200/80 bg-white flex items-center justify-center hover:bg-slate-50 transition text-slate-600 shadow-xs"
-            title="Panic Laboratory Values"
-          >
-            <span className="text-lg">🔔</span>
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
-          </button>
-
-          {/* Doctor Profile Badge & Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setDoctorMenuOpen(!doctorMenuOpen)}
-              className="flex items-center gap-2.5 p-1.5 rounded-2xl hover:bg-slate-50 transition border border-slate-200/80 focus:outline-none"
-            >
-              <div className="w-9 h-9 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-xs shadow-xs ring-2 ring-indigo-100">
-                {getInitials(doctor.fullName)}
-              </div>
-              <div className="text-left pr-1 hidden sm:block">
-                <p className="text-xs font-bold text-slate-900 leading-tight">
-                  {doctor.title} {doctor.fullName}
-                </p>
-                <p className="text-[10px] text-slate-400 font-medium">{doctor.specialty}</p>
-              </div>
-              <span className="text-xs text-slate-400">▾</span>
-            </button>
-
-            {/* Dropdown Menu */}
-            {doctorMenuOpen && (
-              <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs animate-in fade-in zoom-in-95">
-                <div className="px-4 py-2.5 border-b border-slate-100">
-                  <p className="font-extrabold text-slate-900 text-xs">
-                    {doctor.title} {doctor.fullName}
-                  </p>
-                  <p className="text-[11px] text-slate-500 font-medium leading-snug">{doctor.hospital}</p>
-                  <span className="inline-block mt-1 text-[9px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-100">
-                    {doctor.specialty}
-                  </span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setModalMode("signup");
-                    setDoctorMenuOpen(false);
-                    setDoctorModalOpen(true);
-                  }}
-                  className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 font-semibold transition"
-                >
-                  <span>➕</span> Register New Pathologist
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setModalMode("edit");
-                    setDoctorMenuOpen(false);
-                    setDoctorModalOpen(true);
-                  }}
-                  className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 font-semibold transition"
-                >
-                  <span>✏️</span> Edit Pathologist Profile & Stamp
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setModalMode("switch");
-                    setDoctorMenuOpen(false);
-                    setDoctorModalOpen(true);
-                  }}
-                  className="w-full text-left px-4 py-2.5 hover:bg-slate-50 flex items-center gap-2 text-slate-700 font-semibold transition"
-                >
-                  <span>🔄</span> Switch / Demo Accounts
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Mobile greeting view */}
-      <div className="md:hidden bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
-        <h2 className="text-base font-bold text-slate-900 font-serif">
-          Good morning, {doctor.title} {doctor.fullName}! 👋
-        </h2>
-        <p className="text-xs text-slate-400 font-medium mt-0.5">Ready to evaluate slide specimens?</p>
-      </div>
-
-      {/* ==================== 2. HERO BANNER ==================== */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-indigo-900 text-white p-6 sm:p-8 shadow-md border border-slate-800">
-        <div className="relative z-10 max-w-2xl">
-          <span className="inline-block text-[10px] tracking-widest uppercase font-extrabold text-indigo-300 bg-white/10 px-3 py-1 rounded-full backdrop-blur-xs border border-white/10">
-            MEDSCOPE WHOLE SLIDE IMAGING (WSI) SUITE
-          </span>
-          <h3 className="text-2xl sm:text-3xl font-extrabold mt-3 leading-tight tracking-tight font-serif">
-            Precision cellular diagnosis.<br className="hidden sm:inline" /> From smear morphology to tissue architecture.
-          </h3>
-          <p className="text-xs sm:text-sm text-indigo-100 mt-2 font-normal leading-relaxed opacity-95">
-            Seamlessly transition between Wright-Giemsa peripheral blood smears and Hematoxylin & Eosin (H&E) biopsy specimens. Adjust optical objectives up to 100x Oil Immersion, perform differential cell counts, and sign out verified diagnostic impressions.
-          </p>
-          <div className="mt-5 flex flex-wrap items-center gap-3">
-            <button
-              type="button"
-              onClick={scrollToViewer}
-              className="px-5 py-2.5 bg-white text-indigo-950 rounded-xl text-xs font-bold shadow hover:bg-indigo-50 transition flex items-center gap-2"
-            >
-              <span>Launch Virtual Stage</span>
-              <span>↓</span>
-            </button>
+          {/* Pathologist Profile Quick Pill on the right */}
+          <div className="relative shrink-0 flex flex-col items-start md:items-end gap-2">
             <button
               type="button"
               onClick={() => {
-                setModalMode("switch");
+                setModalMode("edit");
                 setDoctorModalOpen(true);
               }}
-              className="px-4 py-2.5 bg-white/15 hover:bg-white/20 text-white rounded-xl text-xs font-semibold backdrop-blur-xs transition flex items-center gap-1.5"
+              className="flex items-center gap-3 p-3 rounded-2xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/15 transition group text-left"
             >
-              <span>Switch Clinician</span>
-              <span>👩‍⚕️</span>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 text-white font-bold flex items-center justify-center text-xs shadow-md ring-2 ring-white/20">
+                {getInitials(doctor.fullName)}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white leading-tight">
+                  {doctor.title} {doctor.fullName}
+                </p>
+                <p className="text-[10px] text-amber-200/90 font-medium">{doctor.specialty}</p>
+                <p className="text-[9px] text-cream-200/60 font-mono truncate max-w-[180px]">{doctor.hospital}</p>
+              </div>
             </button>
           </div>
         </div>
 
         {/* Watermark Graphic */}
-        <div className="absolute -right-6 -bottom-8 opacity-15 text-white pointer-events-none select-none text-9xl">
-          🩸
+        <div className="absolute -right-6 -bottom-8 opacity-10 text-white pointer-events-none select-none text-9xl">
+          🔬
         </div>
       </div>
 
@@ -1326,25 +1217,25 @@ export default function LabSlidesPage() {
               CAP / CLIA Compliant
             </span>
           </div>
-          <div className="relative w-12 h-12 rounded-full bg-indigo-50 border-2 border-indigo-600 flex items-center justify-center">
-            <span className="text-xs font-extrabold text-indigo-700">94%</span>
+          <div className="relative w-12 h-12 rounded-full bg-burgundy-50 border-2 border-burgundy-600 flex items-center justify-center">
+            <span className="text-xs font-extrabold text-burgundy-700">94%</span>
           </div>
         </div>
       </div>
 
       {/* ==================== 4. LABORATORY SLIDE RUN SELECTOR ==================== */}
-      <section id="slideSelector" className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs">
+      <section id="slideSelector" className="bg-white rounded-2xl border border-burgundy-100 p-5 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
           <div>
             <h3 className="font-extrabold text-slate-900 text-sm sm:text-base flex items-center gap-2 font-serif">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />
-              Select Pathology Department & Slide Preparation
+              <span className="w-2.5 h-2.5 rounded-full bg-burgundy-600" />
+              Select Pathology Department &amp; Slide Preparation
             </h3>
             <p className="text-xs text-slate-400 font-medium">
               Toggle between Haematology blood/marrow films and Histopathology tissue microtome sections.
             </p>
           </div>
-          <span className="text-xs font-bold px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full border border-indigo-200 self-start sm:self-auto">
+          <span className="text-xs font-bold px-3 py-1 bg-burgundy-50 text-burgundy-800 rounded-full border border-burgundy-200 self-start sm:self-auto">
             Active: {activeSpecimen.name}
           </span>
         </div>
@@ -1356,7 +1247,7 @@ export default function LabSlidesPage() {
             onClick={() => switchDepartment("haematology")}
             className={`flex-1 py-2 rounded-xl transition flex items-center justify-center gap-2 ${
               activeDepartment === "haematology"
-                ? "bg-white text-indigo-950 shadow-xs font-bold"
+                ? "bg-white text-burgundy-950 shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -1368,7 +1259,7 @@ export default function LabSlidesPage() {
             onClick={() => switchDepartment("histopathology")}
             className={`flex-1 py-2 rounded-xl transition flex items-center justify-center gap-2 ${
               activeDepartment === "histopathology"
-                ? "bg-white text-indigo-950 shadow-xs font-bold"
+                ? "bg-white text-burgundy-950 shadow-xs font-bold"
                 : "text-slate-500 hover:text-slate-800"
             }`}
           >
@@ -1388,13 +1279,13 @@ export default function LabSlidesPage() {
                 onClick={() => selectSlide(slide.id)}
                 className={`p-3.5 rounded-2xl border transition flex flex-col items-center justify-center text-center group ${
                   isActive
-                    ? "border-indigo-600 bg-indigo-50 text-indigo-950 font-bold shadow-xs ring-1 ring-indigo-500/30"
-                    : "border-slate-200 bg-slate-50/70 hover:bg-indigo-50/50 hover:border-indigo-300 text-slate-700 font-semibold"
+                    ? "border-burgundy-600 bg-burgundy-50 text-burgundy-950 font-bold shadow-xs ring-1 ring-burgundy-500/30"
+                    : "border-slate-200 bg-slate-50/70 hover:bg-burgundy-50/50 hover:border-burgundy-300 text-slate-700 font-semibold"
                 }`}
               >
                 <span className="text-2xl group-hover:scale-110 transition">{slide.icon}</span>
                 <span className="text-xs mt-1.5 font-bold leading-tight">{slide.name}</span>
-                <span className="text-[10px] text-indigo-600 font-medium mt-0.5">{slide.subType}</span>
+                <span className="text-[10px] text-burgundy-700 font-medium mt-0.5">{slide.subType}</span>
               </button>
             );
           })}
@@ -1406,7 +1297,7 @@ export default function LabSlidesPage() {
         {/* Stage Header Bar */}
         <div className="px-5 py-4 bg-slate-950 border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-lg font-bold shadow-xs">
+            <div className="w-9 h-9 rounded-xl bg-burgundy-600 text-white flex items-center justify-center text-lg font-bold shadow-xs">
               {activeSpecimen.icon}
             </div>
             <div>

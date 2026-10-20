@@ -222,26 +222,68 @@ export default function ChallengeRoom() {
      ======================================================== */
   if (phase === "create") {
     return (
-      <div className="mx-auto max-w-2xl">
-        <h1 className="text-2xl font-bold text-burgundy-950 sm:text-3xl">
-          Challenge room
-        </h1>
-        <p className="mt-1 text-sm text-burgundy-800/80">
-          Invite a colleague or peer. You take turns answering the same
-          recall MCQs — 2 points per correct answer, −0.5 per wrong one.
-        </p>
+      <div className="space-y-6 pb-12">
+        {/* Top Hero Banner matching Battle Room gradient & aesthetic with 1/4th doctor picture */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-burgundy-950 via-burgundy-900 to-burgundy-850 p-6 text-cream-50 shadow-xl sm:p-8 border border-burgundy-800/80">
+          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-burgundy-600/20 blur-3xl" />
 
-        <div className="mt-5 overflow-hidden rounded-2xl border border-burgundy-200/80 shadow-md">
-          <Image
-            src="/challenge-room.jpg"
-            alt="Challenge Room — Doctors facing off"
-            width={1024}
-            height={655}
-            unoptimized
-            priority
-            className="h-auto w-full object-cover"
-          />
+          <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
+            {/* Banner Left Info (3/4th) */}
+            <div className="max-w-xl">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-xl backdrop-blur-md shadow-inner border border-burgundy-700/60">
+                  ⚔️
+                </div>
+                <div>
+                  <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl text-white">
+                    Challenge Room
+                  </h1>
+                </div>
+              </div>
+              <p className="mt-2 text-sm text-burgundy-100 sm:text-base leading-relaxed">
+                Invite a colleague or peer. You take turns answering the same
+                recall MCQs — 2 points per correct answer, −0.5 per wrong one.
+              </p>
+
+              {/* Stats badges */}
+              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs font-semibold">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/70 border border-burgundy-700 px-3 py-1.5 backdrop-blur-md text-cream-100">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Turn-based Recall
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/70 border border-burgundy-700 px-3 py-1.5 backdrop-blur-md text-cream-100">
+                  👥 1-on-1 Head-to-Head
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-burgundy-800/70 border border-burgundy-700 px-3 py-1.5 backdrop-blur-md text-cream-100">
+                  ⚡ Real-time Peer Sync
+                </span>
+              </div>
+            </div>
+
+            {/* Banner Right: Picture of Doctors in 1/4th of the hero section */}
+            <div className="relative shrink-0 w-full md:w-1/4 max-w-[220px] self-center md:self-auto">
+              <div className="overflow-hidden rounded-2xl border-2 border-amber-400/40 shadow-xl ring-1 ring-white/15 bg-burgundy-950 aspect-[4/3]">
+                <Image
+                  src="/challenge-room.jpg"
+                  alt="Doctors facing off in challenge room"
+                  width={300}
+                  height={225}
+                  unoptimized
+                  priority
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="mt-1.5 text-center">
+                <span className="inline-block rounded-full bg-burgundy-800/80 border border-burgundy-700/80 px-2.5 py-0.5 text-[10px] font-bold text-amber-200">
+                  Clinical Face-Off ⚔️
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div className="mx-auto max-w-2xl space-y-6">
 
         {error && (
           <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
@@ -396,8 +438,9 @@ export default function ChallengeRoom() {
           </button>
         </form>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   /* ========================================================
      PHASE 2: WAITING SCREEN
