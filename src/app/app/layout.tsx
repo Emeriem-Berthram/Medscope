@@ -26,6 +26,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -101,12 +103,42 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               )}
             </button>
 
-            {/* Brand Logo */}
-            <Link href="/app" className="flex items-center gap-2 text-lg sm:text-xl font-bold tracking-tight text-burgundy-700">
-              <span className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg bg-burgundy-600 text-sm sm:text-base text-cream-50 shadow-sm">
-                🩺
-              </span>
-              <span>Medscope</span>
+            {/* Brand Logo & Tagline */}
+            <Link href="/app" className="flex items-center gap-2.5 group">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-burgundy-700 via-burgundy-800 to-burgundy-950 text-cream-50 shadow-md ring-1 ring-burgundy-500/20">
+                <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none">
+                  <path
+                    d="M16 23C13 21 8 21 4 23V8C8 6 13 6 16 8M16 23C19 21 24 21 28 23V8C24 6 19 6 16 8M16 23V8"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M16 4L9 7.5L16 11L23 7.5L16 4Z"
+                    fill="currentColor"
+                    fillOpacity="0.35"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M21 9.5V13"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                  <circle cx="16" cy="15" r="1.5" fill="#fef08a" />
+                </svg>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-base sm:text-lg font-extrabold tracking-tight text-burgundy-950 font-serif leading-tight">
+                  Medscope
+                </span>
+                <span className="text-[10px] sm:text-[11px] font-medium tracking-wide text-burgundy-700/85 leading-none">
+                  Learn • Revise • Succeed
+                </span>
+              </div>
             </Link>
           </div>
 
@@ -171,12 +203,31 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         aria-label="Mobile Navigation"
       >
         {/* Drawer Header */}
-        <div className="flex items-center justify-between border-b border-burgundy-100 bg-gradient-to-r from-burgundy-900 to-burgundy-950 px-4 py-3.5 text-cream-50">
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-burgundy-700 text-sm">🩺</span>
+        <div className="flex items-center justify-between border-b border-burgundy-900 bg-gradient-to-r from-burgundy-900 to-burgundy-950 px-4 py-3.5 text-cream-50">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-burgundy-800 text-cream-50 shadow-sm ring-1 ring-burgundy-600/30">
+              <svg viewBox="0 0 32 32" className="h-4 w-4" fill="none">
+                <path
+                  d="M16 23C13 21 8 21 4 23V8C8 6 13 6 16 8M16 23C19 21 24 21 28 23V8C24 6 19 6 16 8M16 23V8"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M16 4L9 7.5L16 11L23 7.5L16 4Z"
+                  fill="currentColor"
+                  fillOpacity="0.35"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinejoin="round"
+                />
+                <circle cx="16" cy="15" r="1.5" fill="#fef08a" />
+              </svg>
+            </div>
             <div>
-              <p className="font-bold text-sm leading-tight text-white">Medscope</p>
-              <p className="text-[10px] text-burgundy-200">Postgraduate Exam Engine</p>
+              <p className="font-extrabold text-sm leading-tight text-white font-serif">Medscope</p>
+              <p className="text-[10px] text-burgundy-200/90 font-medium tracking-wide">Learn • Revise • Succeed</p>
             </div>
           </div>
           <button
@@ -242,6 +293,48 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           })}
         </div>
 
+        {/* Drawer Discipline Quote & Settings */}
+        <div className="p-3 border-t border-burgundy-100/80 bg-cream-50 space-y-2">
+          <div className="rounded-2xl bg-gradient-to-br from-burgundy-900 via-burgundy-800 to-burgundy-950 p-3 text-cream-50 shadow-sm border border-burgundy-700/50">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-rose-500 text-xs shadow-xs">
+                💡
+              </span>
+              <p className="text-[11px] font-semibold leading-snug text-cream-100">
+                Discipline today builds your future tomorrow.
+              </p>
+            </div>
+            <div className="mt-1 text-center text-xs">
+              <span className="text-rose-300">🤍</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setSettingsOpen(true);
+              }}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-burgundy-200 bg-white py-2 text-xs font-semibold text-burgundy-800 hover:bg-burgundy-50 shadow-xs"
+            >
+              <span>⚙️</span>
+              <span>Settings</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setHelpOpen(true);
+              }}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-burgundy-200 bg-white py-2 text-xs font-semibold text-burgundy-800 hover:bg-burgundy-50 shadow-xs"
+            >
+              <span>❓</span>
+              <span>Help</span>
+            </button>
+          </div>
+        </div>
+
         {/* Drawer Footer Actions */}
         <div className="border-t border-burgundy-100/90 p-3 bg-cream-50">
           <button
@@ -257,8 +350,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Main Layout Grid: On md+ (desktop view on phone 980px, tablets, laptops) the menu & main content are side-by-side on the SAME LEVEL! */}
       <div className="mx-auto grid max-w-7xl gap-6 lg:gap-8 px-3 sm:px-6 py-4 sm:py-8 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr] items-start">
         {/* Desktop Sidebar (visible on md+, hidden on mobile) */}
-        <aside className="hidden space-y-1 md:block md:sticky md:top-20 md:self-start">
-          <nav aria-label="Desktop Navigation" className="space-y-1">
+        <aside className="hidden space-y-3 md:block md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:flex md:flex-col">
+          <nav aria-label="Desktop Navigation" className="space-y-1 overflow-y-auto pr-1 no-scrollbar flex-1">
             {NAV.map((item) => {
               const active = item.end
                 ? pathname === item.href
@@ -279,6 +372,44 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               );
             })}
           </nav>
+
+          {/* Bottom Left Sidebar Section: Discipline card + Settings + Help & Support */}
+          <div className="pt-2 space-y-2 border-t border-burgundy-200/60 mt-auto">
+            {/* Discipline Quote Card */}
+            <div className="rounded-2xl bg-gradient-to-br from-burgundy-900 via-burgundy-800 to-burgundy-950 p-3 text-cream-50 shadow-sm border border-burgundy-700/50">
+              <div className="flex items-center gap-2">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-500 to-rose-500 text-xs shadow-xs">
+                  💡
+                </span>
+                <p className="text-[11px] font-semibold leading-snug text-cream-100">
+                  Discipline today builds your future tomorrow.
+                </p>
+              </div>
+              <div className="mt-1 text-center text-xs">
+                <span className="text-rose-300">🤍</span>
+              </div>
+            </div>
+
+            {/* Settings & Help Links */}
+            <div className="space-y-0.5 pt-1">
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(true)}
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
+              >
+                <span className="text-base shrink-0">⚙️</span>
+                <span className="truncate">Settings</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setHelpOpen(true)}
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
+              >
+                <span className="text-base shrink-0">❓</span>
+                <span className="truncate">Help & Support</span>
+              </button>
+            </div>
+          </div>
         </aside>
 
         {/* Main Content Area (on same level with menu on md+, starts at top on mobile) */}
@@ -365,6 +496,155 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </button>
         </div>
       </div>
+
+      {/* Settings Modal */}
+      {settingsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-burgundy-950/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-burgundy-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-burgundy-100">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-burgundy-100 text-burgundy-800 text-sm">
+                  ⚙️
+                </span>
+                <h3 className="font-bold text-burgundy-950 text-base">Account & Settings</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                className="h-8 w-8 rounded-full text-burgundy-400 hover:bg-burgundy-50 hover:text-burgundy-900 flex items-center justify-center font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-burgundy-900 block mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={user.name || "Merisco Merisco"}
+                  className="w-full rounded-xl border border-burgundy-200 bg-burgundy-50/50 px-3.5 py-2 text-xs font-medium text-burgundy-950"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-burgundy-900 block mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  disabled
+                  value={user.email}
+                  className="w-full rounded-xl border border-burgundy-200 bg-burgundy-50/50 px-3.5 py-2 text-xs font-medium text-burgundy-950"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-burgundy-900 block mb-1">
+                  Registered Target Exam
+                </label>
+                <div className="rounded-xl border border-burgundy-200 bg-white px-3.5 py-2 text-xs font-medium text-burgundy-900 flex items-center justify-between">
+                  <span>{user.exam || "WACP / WACS Primaries"}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-burgundy-700 bg-burgundy-100 px-2 py-0.5 rounded-full">
+                    {user.plan}
+                  </span>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-burgundy-100 bg-cream-50/70 p-3.5 space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-burgundy-950">
+                  <span>Battle Sound Effects</span>
+                  <span className="text-emerald-700 font-bold">Enabled ✓</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-semibold text-burgundy-950">
+                  <span>Study Reminders</span>
+                  <span className="text-emerald-700 font-bold">Active ✓</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setSettingsOpen(false)}
+                className="rounded-full bg-burgundy-600 px-5 py-2 text-xs font-bold text-white hover:bg-burgundy-700 shadow-sm"
+              >
+                Close Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Help & Support Modal */}
+      {helpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-burgundy-950/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-3xl border border-burgundy-100 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-burgundy-100">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-burgundy-100 text-burgundy-800 text-sm">
+                  ❓
+                </span>
+                <h3 className="font-bold text-burgundy-950 text-base">Medscope Help & Support</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHelpOpen(false)}
+                className="h-8 w-8 rounded-full text-burgundy-400 hover:bg-burgundy-50 hover:text-burgundy-900 flex items-center justify-center font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3 text-xs text-burgundy-900">
+              <p className="leading-relaxed">
+                Need help with your postgraduate revision, battle rooms, or subscription activation? Our academic and technical medical team is available 24/7.
+              </p>
+
+              <div className="space-y-2 pt-1">
+                <a
+                  href="mailto:support@medscope.ng"
+                  className="flex items-center justify-between rounded-xl border border-burgundy-200 bg-cream-50 p-3 hover:bg-burgundy-50 transition"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">✉️</span>
+                    <div>
+                      <p className="font-bold text-burgundy-950">Email Support</p>
+                      <p className="text-[11px] text-burgundy-700">support@medscope.ng</p>
+                    </div>
+                  </div>
+                  <span className="text-burgundy-600 font-bold">Send →</span>
+                </a>
+
+                <div className="rounded-xl border border-burgundy-200 bg-cream-50 p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">⚡</span>
+                    <div>
+                      <p className="font-bold text-burgundy-950">Battle Room Protocols</p>
+                      <p className="text-[11px] text-burgundy-700">
+                        Battles run live in real-time. Correct answers score +2, incorrect -0.5.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setHelpOpen(false)}
+                className="rounded-full bg-burgundy-600 px-5 py-2 text-xs font-bold text-white hover:bg-burgundy-700 shadow-sm"
+              >
+                Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
