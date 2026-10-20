@@ -10,10 +10,10 @@ const NAV = [
   { href: "/app/questions", label: "Question bank", icon: "📚" },
   { href: "/app/practice", label: "Practise", icon: "✍️" },
   { href: "/app/mock", label: "Mock exam", icon: "⏱️" },
-  { href: "/app/challenge", label: "Challenge room", icon: "⚔️" },
-  { href: "/app/battle", label: "Battle room", icon: "🏆" },
   { href: "/app/radiographs", label: "Radiographs", icon: "🩻" },
   { href: "/app/lab-slides", label: "Laboratory slides", icon: "🔬" },
+  { href: "/app/battle", label: "Battle room", icon: "🏆" },
+  { href: "/app/challenge", label: "Challenge room", icon: "⚔️" },
   { href: "/app/performance", label: "Performance", icon: "📈" },
   { href: "/app/bookmarks", label: "Bookmarks", icon: "🔖" },
   { href: "/app/resources", label: "Free Resources", icon: "💡" },
@@ -349,8 +349,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Main Layout Grid: Default sidebar visible across all sections including Radiology and Laboratory */}
       <div className="mx-auto max-w-7xl px-3 sm:px-6 py-4 sm:py-8 grid gap-6 lg:gap-8 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr] items-start">
-        <aside className="hidden space-y-3 md:block md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:flex md:flex-col">
-          <nav aria-label="Desktop Navigation" className="space-y-1 overflow-y-auto pr-1 no-scrollbar flex-1">
+        <aside className="hidden md:flex md:flex-col md:sticky md:top-16 md:self-start md:h-[calc(100vh-5.5rem)] space-y-3 justify-between pb-2">
+          <nav aria-label="Desktop Navigation" className="space-y-1 overflow-y-auto pr-1 no-scrollbar flex-1 min-h-0">
             {NAV.map((item) => {
               const active = item.end
                 ? pathname === item.href
@@ -372,8 +372,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
             })}
           </nav>
 
-          {/* Bottom Left Sidebar Section: Discipline card + Settings + Help & Support */}
-          <div className="pt-2 space-y-2 border-t border-burgundy-200/60 mt-auto">
+          {/* Far Bottom Left Sidebar Section: Discipline card + Settings + Help & Support */}
+          <div className="pt-3 space-y-2.5 border-t border-burgundy-200/60 mt-auto shrink-0">
             {/* Discipline Quote Card */}
             <div className="rounded-2xl bg-gradient-to-br from-burgundy-900 via-burgundy-800 to-burgundy-950 p-3 text-cream-50 shadow-sm border border-burgundy-700/50">
               <div className="flex items-center gap-2">
@@ -389,23 +389,23 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               </div>
             </div>
 
-            {/* Settings & Help Links */}
+            {/* Settings & Help Links pinned at the far bottom left */}
             <div className="space-y-0.5 pt-1">
               <button
                 type="button"
                 onClick={() => setSettingsOpen(true)}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-bold text-burgundy-900 hover:bg-burgundy-100/80 transition-all text-left group"
               >
-                <span className="text-base shrink-0">⚙️</span>
+                <span className="text-base shrink-0 group-hover:rotate-45 transition-transform">⚙️</span>
                 <span className="truncate">Settings</span>
               </button>
               <button
                 type="button"
                 onClick={() => setHelpOpen(true)}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
+                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-bold text-burgundy-900 hover:bg-burgundy-100/80 transition-all text-left group"
               >
-                <span className="text-base shrink-0">❓</span>
-                <span className="truncate">Help & Support</span>
+                <span className="text-base shrink-0 group-hover:scale-110 transition-transform">❓</span>
+                <span className="truncate">Help &amp; Support</span>
               </button>
             </div>
           </div>

@@ -1067,7 +1067,7 @@ export default function LabSlidesPage() {
   );
 
   return (
-    <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 antialiased selection:bg-indigo-100 selection:text-indigo-900 pb-12">
+    <div className="space-y-6 pb-12 antialiased selection:bg-burgundy-100 selection:text-burgundy-900">
       {/* Toast Notification Container */}
       <div
         className={`fixed top-5 right-5 z-50 transform transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-3.5 rounded-2xl shadow-2xl text-xs sm:text-sm font-medium border border-slate-700 ${
@@ -1078,69 +1078,34 @@ export default function LabSlidesPage() {
         <span>{toastMessage}</span>
       </div>
 
-      {/* ==================== HERO BANNER (Battle Room Gradient) ==================== */}
+      {/* ==================== HERO BANNER (Battle Room Gradient & Breadth) ==================== */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-burgundy-950 via-burgundy-900 to-burgundy-850 text-cream-50 p-6 sm:p-8 shadow-xl border border-burgundy-800/80">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-burgundy-600/20 blur-3xl" />
 
-        <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-          <div className="max-w-2xl">
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="inline-block text-[10px] tracking-widest uppercase font-extrabold text-amber-200 bg-white/10 px-3 py-1 rounded-full backdrop-blur-xs border border-white/10">
-                MEDSCOPE WHOLE SLIDE IMAGING (WSI) SUITE
-              </span>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
-                WSI Stage Ready
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-white font-serif">
-              Precision cellular diagnosis.<br className="hidden sm:inline" /> From smear morphology to tissue architecture.
-            </h1>
-            <p className="text-xs sm:text-sm text-cream-100/90 mt-2 font-normal leading-relaxed">
-              Seamlessly transition between Wright-Giemsa peripheral blood smears and Hematoxylin &amp; Eosin (H&amp;E) biopsy specimens. Adjust optical objectives up to 100x Oil Immersion, perform differential cell counts, and sign out verified diagnostic impressions.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button
-                type="button"
-                onClick={scrollToViewer}
-                className="px-5 py-2.5 bg-burgundy-600 hover:bg-burgundy-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-2"
-              >
-                <span>Launch Virtual Stage</span>
-                <span>↓</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setModalMode("switch");
-                  setDoctorModalOpen(true);
-                }}
-                className="px-4 py-2.5 bg-white/15 hover:bg-white/20 text-cream-50 rounded-xl text-xs font-semibold backdrop-blur-xs transition flex items-center gap-1.5 border border-white/15"
-              >
-                <span>👩‍⚕️ Switch Clinician ({doctor.title} {doctor.fullName})</span>
-              </button>
-            </div>
+        <div className="relative z-10 max-w-2xl">
+          <div className="flex items-center gap-2.5 mb-2">
+            <span className="inline-block text-[10px] tracking-widest uppercase font-extrabold text-amber-200 bg-white/10 px-3 py-1 rounded-full backdrop-blur-xs border border-white/10">
+              MEDSCOPE WHOLE SLIDE IMAGING (WSI) SUITE
+            </span>
+            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30">
+              WSI Stage Ready
+            </span>
           </div>
-
-          {/* Pathologist Profile Quick Pill on the right */}
-          <div className="relative shrink-0 flex flex-col items-start md:items-end gap-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight text-white font-serif">
+            Precision cellular diagnosis.<br className="hidden sm:inline" /> From smear morphology to tissue architecture.
+          </h1>
+          <p className="text-xs sm:text-sm text-cream-100/90 mt-2 font-normal leading-relaxed">
+            Seamlessly transition between Wright-Giemsa peripheral blood smears and Hematoxylin &amp; Eosin (H&amp;E) biopsy specimens. Adjust optical objectives up to 100x Oil Immersion, perform differential cell counts, and sign out verified diagnostic impressions.
+          </p>
+          <div className="mt-5 flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={() => {
-                setModalMode("edit");
-                setDoctorModalOpen(true);
-              }}
-              className="flex items-center gap-3 p-3 rounded-2xl bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/15 transition group text-left"
+              onClick={scrollToViewer}
+              className="px-5 py-2.5 bg-burgundy-600 hover:bg-burgundy-700 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center gap-2"
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-rose-500 text-white font-bold flex items-center justify-center text-xs shadow-md ring-2 ring-white/20">
-                {getInitials(doctor.fullName)}
-              </div>
-              <div>
-                <p className="text-xs font-bold text-white leading-tight">
-                  {doctor.title} {doctor.fullName}
-                </p>
-                <p className="text-[10px] text-amber-200/90 font-medium">{doctor.specialty}</p>
-                <p className="text-[9px] text-cream-200/60 font-mono truncate max-w-[180px]">{doctor.hospital}</p>
-              </div>
+              <span>Launch Virtual Stage</span>
+              <span>↓</span>
             </button>
           </div>
         </div>

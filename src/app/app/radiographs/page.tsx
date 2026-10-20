@@ -1108,7 +1108,7 @@ export default function RadiographsPage() {
   const checkedCount = Object.values(checkedItems).filter(Boolean).length;
 
   return (
-    <div className="w-full max-w-7xl mx-auto flex flex-col gap-6 antialiased selection:bg-indigo-100 selection:text-indigo-900 pb-12">
+    <div className="space-y-6 pb-12 antialiased selection:bg-burgundy-100 selection:text-burgundy-900">
       {/* ======================== TOAST NOTIFICATION CONTAINER ======================== */}
       <div
         className={`fixed top-5 right-5 z-50 transform transition-all duration-300 flex items-center gap-3 bg-slate-900 text-white px-5 py-3 rounded-2xl shadow-2xl text-xs sm:text-sm font-medium border border-slate-700 ${
@@ -1120,12 +1120,12 @@ export default function RadiographsPage() {
       </div>
 
       {/* ==================== HERO BANNER (Battle Room Gradient) ==================== */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-burgundy-950 via-burgundy-900 to-burgundy-850 text-cream-50 p-6 sm:p-8 shadow-xl border border-burgundy-800/80">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-burgundy-950 via-burgundy-900 to-burgundy-850 p-6 text-cream-50 shadow-xl sm:p-8 border border-burgundy-800/80">
         <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-amber-500/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-20 -left-20 h-72 w-72 rounded-full bg-burgundy-600/20 blur-3xl" />
 
         <div className="relative z-10 flex flex-col justify-between gap-6 md:flex-row md:items-center">
-          <div className="max-w-2xl">
+          <div className="max-w-xl">
             <div className="flex items-center gap-2.5 mb-2">
               <span className="inline-block text-[10px] tracking-widest uppercase font-extrabold text-amber-200 bg-white/10 px-3 py-1 rounded-full backdrop-blur-xs border border-white/10">
                 CLINICAL RADIOGRAPHY &amp; PACS WORKSTATION
