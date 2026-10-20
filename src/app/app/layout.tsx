@@ -347,73 +347,80 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Main Layout Grid: On md+ (desktop view on phone 980px, tablets, laptops) the menu & main content are side-by-side on the SAME LEVEL! */}
-      <div className="mx-auto grid max-w-7xl gap-6 lg:gap-8 px-3 sm:px-6 py-4 sm:py-8 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr] items-start">
-        {/* Desktop Sidebar (visible on md+, hidden on mobile) */}
-        <aside className="hidden space-y-3 md:block md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:flex md:flex-col">
-          <nav aria-label="Desktop Navigation" className="space-y-1 overflow-y-auto pr-1 no-scrollbar flex-1">
-            {NAV.map((item) => {
-              const active = item.end
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold transition-all ${
-                    active
-                      ? "bg-burgundy-600 text-white shadow-sm font-bold"
-                      : "text-burgundy-850 hover:bg-burgundy-100/70"
-                  }`}
+      {/* Main Layout Grid: When on Radiographs, sidebar is excluded for centered full-width view; on other pages, side-by-side desktop view */}
+      <div
+        className={`mx-auto max-w-7xl px-3 sm:px-6 py-4 sm:py-8 ${
+          pathname.startsWith("/app/radiographs")
+            ? "w-full"
+            : "grid gap-6 lg:gap-8 md:grid-cols-[200px_1fr] lg:grid-cols-[220px_1fr] items-start"
+        }`}
+      >
+        {!pathname.startsWith("/app/radiographs") && (
+          <aside className="hidden space-y-3 md:block md:sticky md:top-20 md:self-start md:max-h-[calc(100vh-6rem)] md:flex md:flex-col">
+            <nav aria-label="Desktop Navigation" className="space-y-1 overflow-y-auto pr-1 no-scrollbar flex-1">
+              {NAV.map((item) => {
+                const active = item.end
+                  ? pathname === item.href
+                  : pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold transition-all ${
+                      active
+                        ? "bg-burgundy-600 text-white shadow-sm font-bold"
+                        : "text-burgundy-850 hover:bg-burgundy-100/70"
+                    }`}
+                  >
+                    <span className="text-base shrink-0">{item.icon}</span>
+                    <span className="truncate">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Bottom Left Sidebar Section: Discipline card + Settings + Help & Support */}
+            <div className="pt-2 space-y-2 border-t border-burgundy-200/60 mt-auto">
+              {/* Discipline Quote Card */}
+              <div className="rounded-2xl bg-gradient-to-br from-burgundy-900 via-burgundy-800 to-burgundy-950 p-3 text-cream-50 shadow-sm border border-burgundy-700/50">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-500 to-rose-500 text-xs shadow-xs">
+                    💡
+                  </span>
+                  <p className="text-[11px] font-semibold leading-snug text-cream-100">
+                    Discipline today builds your future tomorrow.
+                  </p>
+                </div>
+                <div className="mt-1 text-center text-xs">
+                  <span className="text-rose-300">🤍</span>
+                </div>
+              </div>
+
+              {/* Settings & Help Links */}
+              <div className="space-y-0.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setSettingsOpen(true)}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
                 >
-                  <span className="text-base shrink-0">{item.icon}</span>
-                  <span className="truncate">{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Bottom Left Sidebar Section: Discipline card + Settings + Help & Support */}
-          <div className="pt-2 space-y-2 border-t border-burgundy-200/60 mt-auto">
-            {/* Discipline Quote Card */}
-            <div className="rounded-2xl bg-gradient-to-br from-burgundy-900 via-burgundy-800 to-burgundy-950 p-3 text-cream-50 shadow-sm border border-burgundy-700/50">
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-gradient-to-tr from-amber-500 to-rose-500 text-xs shadow-xs">
-                  💡
-                </span>
-                <p className="text-[11px] font-semibold leading-snug text-cream-100">
-                  Discipline today builds your future tomorrow.
-                </p>
-              </div>
-              <div className="mt-1 text-center text-xs">
-                <span className="text-rose-300">🤍</span>
+                  <span className="text-base shrink-0">⚙️</span>
+                  <span className="truncate">Settings</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setHelpOpen(true)}
+                  className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
+                >
+                  <span className="text-base shrink-0">❓</span>
+                  <span className="truncate">Help & Support</span>
+                </button>
               </div>
             </div>
+          </aside>
+        )}
 
-            {/* Settings & Help Links */}
-            <div className="space-y-0.5 pt-1">
-              <button
-                type="button"
-                onClick={() => setSettingsOpen(true)}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
-              >
-                <span className="text-base shrink-0">⚙️</span>
-                <span className="truncate">Settings</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setHelpOpen(true)}
-                className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs lg:text-sm font-semibold text-burgundy-850 hover:bg-burgundy-100/70 transition-all text-left"
-              >
-                <span className="text-base shrink-0">❓</span>
-                <span className="truncate">Help & Support</span>
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        {/* Main Content Area (on same level with menu on md+, starts at top on mobile) */}
-        <main className="min-w-0 pb-24 md:pb-8">{children}</main>
+        {/* Main Content Area */}
+        <main className="min-w-0 pb-24 md:pb-8 w-full">{children}</main>
       </div>
 
       {/* Interactive Mobile Bottom Navigation Bar (App Bar, visible only on screens < md) */}
